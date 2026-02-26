@@ -1,0 +1,7 @@
+.ig-post_list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%; /*mozda nepotrebno*/
+  }
+  

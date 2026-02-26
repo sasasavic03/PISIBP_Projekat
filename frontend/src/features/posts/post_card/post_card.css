@@ -1,0 +1,96 @@
+
+:root {
+    --ig-border: #dbdbdb;
+    --ig-text: #0f0f0f;
+    --ig-muted: #737373;
+    --ig-hover: #f2f2f2;
+    --ig-bg: #ffffff;
+}
+
+
+  .ig-post_card {
+    background: var(--ig-bg);
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 24px;
+    border: 1px solid var(--ig-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  /* HEADER */
+  .ig-post_header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+  }
+  
+  .ig-post_user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--ig-text);
+  }
+  
+  .ig-post_avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+  
+  .ig-post_username {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  /* MEDIA */
+
+
+  .ig-post_media {
+  width: 100%;
+  aspect-ratio: 1 / 1;      
+  background-color: black; /* black barovi */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ig-post_media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;     /* ne sece sliku */
+}
+
+  
+  /* ACTIONS */
+  .ig-post_actions {
+    display: flex;
+    gap: 12px;
+    padding: 8px 12px;
+  }
+  
+  .ig-post_actions button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color:var(--ig-text);
+  }
+  
+  /* CONTENT */
+  .ig-post_content {
+    padding: 0 12px 12px;
+    color: var(--ig-text);
+  }
+  
+  .ig-post_likes {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: var(--ig-text);
+  }
+  
+  
+

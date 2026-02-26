@@ -1,0 +1,27 @@
+:root {
+    --ig-border: #dbdbdb;
+    --ig-text: #0f0f0f;
+    --ig-muted: #737373;
+    --ig-hover: #f2f2f2;
+    --ig-bg: #ffffff;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.layout-main {
+    
+    background: #fafafa;
+    width: 100%;
+  }
+
+.layout-sidebar{
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+

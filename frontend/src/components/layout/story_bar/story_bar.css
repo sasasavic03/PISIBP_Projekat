@@ -1,0 +1,135 @@
+:root {
+    --ig-border: #dbdbdb;
+    --ig-text: #0f0f0f;
+    --ig-muted: #737373;
+    --ig-hover: #f2f2f2;
+    --ig-bg: #ffffff;
+}
+
+ .ig-storybar{
+    position: fixed;
+    top:20px;
+    right:50%;
+    transform: translateX(50%);/* potencijalno nepotrebno */
+    width: min(420px, 92vw);
+    height:80px;
+    background: var(--ig-bg);
+    border: 1px solid var(--ig-border); /*  */
+    border-right: 1px solid var(--ig-border);
+    align-items: center;
+    display: flex;
+    border-radius: 6px;
+    /* padding-left:8px; */
+    padding: 8px 44px 8px 8px; /* prostor za strelicu */
+    overflow: hidden; 
+    box-sizing: border-box;
+
+ }
+
+ .ig-storybar_scroll {
+   flex: 1;
+   min-width: 0; 
+   overflow-x: auto;
+   overflow-y: hidden;
+   width: 100%;
+   scroll-behavior: smooth;
+   -webkit-overflow-scrolling: touch;
+ }
+
+ .ig-storybar_scroll::-webkit-scrollbar {
+   display: none;
+ }
+ .ig-storybar_scroll {
+   scrollbar-width: none; /* Firefox */
+ }
+
+ .ig-storybar_list{
+    display: flex;
+    gap: 16px;
+    list-style: none; 
+    padding: 0;
+    /* margin-top: 10px;
+    margin-bottom: 10px; */
+    margin:0;
+    white-space: nowrap;
+   
+ }
+
+ .ig-storybar_item {
+   flex: 0 0 auto;
+ }
+
+ .ig-storybar_link {
+   display: inline-flex;
+   flex-direction: column;
+   align-items: center;
+   text-decoration: none;
+ }
+
+ .ig-storybar_arrow {
+   color:#111;
+   position: absolute;
+   top: 50%;
+   transform: translateY(-50%);
+ 
+   width: 32px;
+   height: 32px;
+   border-radius: 999px;
+ 
+   border: 1px solid var(--ig-border);
+   background: var(--ig-bg);
+   cursor: pointer;
+ 
+   display: grid;
+   place-items: center;
+ 
+   line-height: 1;
+   font-size: 20px;
+
+   padding:0;
+ }
+
+ .ig-storybar_arrow svg {
+   opacity: 1;
+   width: 18px;
+   height: 18px;
+ }
+
+ .ig-storybar_arrow_right {
+   right: 8px;
+ }
+ 
+ .ig-storybar_arrow_left {
+   left: 8px;
+ }
+
+  /* ol {          // "obican" css u reactu je globalan, zato ol
+    display: flex;    u ovom slucaju utice i na elemente iz sidebar-a
+    gap: 16px;
+    list-style: none; 
+    padding: 0;
+    margin: 0;
+  } */
+
+
+ .ig-storybar_avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    margin-bottom: -7px;
+    
+    
+  }
+
+  .ig-storybar_username{
+    font-size: 10px;
+    font-weight: 480;
+    color: var(--ig-text);
+ }
+
+
+
+
+  
