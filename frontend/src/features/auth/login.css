@@ -1,0 +1,88 @@
+:root {
+    --ig-border: #dbdbdb;
+    --ig-text: #0f0f0f;
+    --ig-muted: #737373;
+    --ig-hover: #f2f2f2;
+    --ig-bg: #ffffff;
+    --ig-btn:#0095f6;
+    --ig-btn-hover:#1877f2;
+}
+
+    .ig-login{
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    
+    .ig-login_form {
+        background-color: var(--ig-bg);
+        border: 1px solid var(--ig-border);
+        width: 350px;
+        padding: 40px 40px 25px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        box-sizing: border-box;
+    }
+  
+  
+  .ig-login_form h2 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  
+  
+  .ig-login_form input {
+    padding: 10px;
+    color: var(--ig-text);
+    border: 1px solid var(--ig-border);
+    background-color: #fafafa;
+    font-size: 14px;
+    border-radius: 3px;
+    outline: none;
+  }
+  
+  .ig-login_form input:focus {
+    border-color: var(--ig-border);
+    background-color: var(--ig-bg);
+  }
+  
+  /* Dugme */
+  .ig-login_form button {
+    margin-top: 10px;
+    padding: 8px;
+    background-color: var(--ig-btn);
+    color: var(--ig-bg);
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .ig-login_form button:hover {
+    background-color: var(--ig-btn-hover);
+  }
+  
+  
+  .ig-login_form p {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--ig-text);
+  }
+  
+  
+  .ig-login_form a {
+    color: var(--ig-btn);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .ig-login_form a:hover {
+    text-decoration: underline;
+  }
