@@ -13,7 +13,6 @@
         <module>auth-service</module>
         <module>follow-service</module>
         <module>post-service</module>
-        <module>untitled</module>
     </modules>
 
     <properties>
