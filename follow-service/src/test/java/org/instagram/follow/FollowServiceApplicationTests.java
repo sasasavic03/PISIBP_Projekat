@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 
@@ -16,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
-@SpringBootTest
 class FollowServiceApplicationTests {
 
     @Mock
@@ -64,7 +62,7 @@ class FollowServiceApplicationTests {
                 .thenReturn(Optional.of(new Follow()));
 
         assertThrows(RuntimeException.class,
-                () -> service.follow(1l,2L,false));
+                () -> service.follow(1L,2L,false));
     }
 
     //TEST ZA UNFOLLOW

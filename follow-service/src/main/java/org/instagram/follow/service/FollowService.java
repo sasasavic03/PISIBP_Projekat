@@ -4,9 +4,11 @@ import jakarta.transaction.Transactional;
 import org.instagram.follow.model.Follow;
 import org.instagram.follow.model.FollowStatus;
 import org.instagram.follow.repository.FollowRepository;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Service
 public class FollowService {
 
     private final FollowRepository repository;

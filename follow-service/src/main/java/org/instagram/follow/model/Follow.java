@@ -14,7 +14,7 @@ public class Follow {
     private Long id;
 
     @Column(name = "follower_id" , nullable = false)
-    private Long followerid;
+    private Long followerId;
 
     @Column(name = "following_id", nullable = false)
     private Long followingId;
@@ -29,7 +29,7 @@ public class Follow {
         return id;
     }
     public Long getFollowerid(){
-        return followerid;
+        return followerId;
     }
     public Long getFollowingId(){
         return followingId;
@@ -48,7 +48,7 @@ public class Follow {
     }
 
     public void setFollowerid(Long followerid) {
-        this.followerid = followerid;
+        this.followerId = followerid;
     }
 
     public void setFollowingId(Long followingId) {
