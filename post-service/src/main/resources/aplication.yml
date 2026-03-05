@@ -1,3 +1,66 @@
 spring:
   application:
     name: post-service
+    datasource:
+      url: jdbc:postgresql://localhost:5433/post_db
+      username: rosu
+      password: 123456
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximum-pool-size: 10
+        minimum-idle: 5
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+
+      jpa:
+        hibernate:
+          ddl-auto: update
+        show-sql: true
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQLDialect
+            format_sql: true
+            jdbc:
+              batch_size: 20
+            order_inserts: true
+            order_updates: true
+
+      servlet:
+        multipart:
+          enabled: true
+          max-file-size: 50MB      # Maximum file size per file
+          max-request-size: 1000MB  # Total request size (20 files * 50MB)
+          file-size-threshold: 2MB
+
+    server:
+      port: 8081
+      error:
+        include-message: always
+        include-binding-errors: always
+
+    # Post Configuration
+    post:
+      max-media-count: 20          # Maximum 20 media items per post
+      max-media-size: 52428800     # 50 MB in bytes
+      max-description-length: 2200 # Maximum description length
+      allowed-image-types:
+        - image/jpeg
+        - image/jpg
+        - image/png
+        - image/gif
+        - image/webp
+      allowed-video-types:
+        - video/mp4
+        - video/quicktime
+        - video/x-msvideo
+        - video/mpeg
+
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics
+      endpoint:
+        health:
+          show-details: always
