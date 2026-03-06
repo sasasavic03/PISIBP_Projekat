@@ -13,6 +13,8 @@
         <module>auth-service</module>
         <module>follow-service</module>
         <module>post-service</module>
+        <module>block-service</module>
+        <module>block-service</module>
     </modules>
 
     <properties>
