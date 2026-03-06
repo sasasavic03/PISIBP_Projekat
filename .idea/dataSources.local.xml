@@ -31,5 +31,16 @@
         </introspection-scope>
       </schema-mapping>
     </data-source>
+    <data-source name="interactions_db@localhost" uuid="897ea3e8-4172-4d11-9822-bcf58dfdd07b">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="POSTGRES" exact-version="18.3" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>rosu</user-name>
+      <schema-mapping />
+    </data-source>
+    <data-source name="post_db@localhost" uuid="477cf0e7-c7a5-4fe6-9f75-bfdfaf2a4eef">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="POSTGRES" />
+      <user-name>rosu</user-name>
+      <schema-mapping />
+    </data-source>
   </component>
 </project>
