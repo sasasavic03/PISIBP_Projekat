@@ -1,6 +1,7 @@
 package org.instagram.block;
 
 
+import org.instagram.block.dto.BlockResponseDto;
 import org.instagram.block.model.Block;
 import org.instagram.block.repository.BlockRepository;
 import org.instagram.block.service.BlockService;
@@ -92,7 +93,7 @@ public class BlockServiceTest {
     void getBlockedUsers_ShouldReturnList(){
         when(blockRepository.findByBlockerId(1L)).thenReturn(List.of(block));
 
-        List<Block> result = blockService.getBlockedUsers(1L);
+        List<BlockResponseDto> result = blockService.getBlockedUsers(1L);
 
         assertEquals(1,result.size());
         assertEquals(1L,result.get(0).getBlockerId());

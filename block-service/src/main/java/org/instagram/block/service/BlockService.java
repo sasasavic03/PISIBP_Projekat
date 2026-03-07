@@ -1,5 +1,6 @@
 package org.instagram.block.service;
 
+import org.instagram.block.dto.BlockResponseDto;
 import org.instagram.block.model.Block;
 import org.instagram.block.repository.BlockRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class BlockService {
     }
 
     public void block(Long blockerId, Long blockedId) {
-        if(blockRepository.existsByBlockerIdAndBlockedId(blockerId, blockedId)){
+        if (blockRepository.existsByBlockerIdAndBlockedId(blockerId, blockedId)) {
             throw new RuntimeException("Already blocked");
         }
         Block block = new Block();
@@ -28,18 +29,24 @@ public class BlockService {
     }
 
     public void unblock(Long blockerId, Long blockedId) {
-        Block block = blockRepository.findByBlockerIdAndBlockedId(blockerId,blockedId)
+        Block block = blockRepository.findByBlockerIdAndBlockedId(blockerId, blockedId)
                 .orElseThrow(() -> new RuntimeException("Block not found"));
         blockRepository.delete(block);
     }
 
     public boolean isBlocked(Long blockerId, Long blockedId) {
-        return blockRepository.existsByBlockerIdAndBlockedId(blockerId,blockedId);
+        return blockRepository.existsByBlockerIdAndBlockedId(blockerId, blockedId);
     }
 
-    public List<Block> getBlockedUsers(Long blockerId) {
-        return blockRepository.findByBlockerId(blockerId);
+    public List<BlockResponseDto> getBlockedUsers(Long blockerId) {
+        return blockRepository.findByBlockerId(blockerId)
+                .stream()
+                .map(b -> new BlockResponseDto(
+                        b.getId(),
+                        b.getBlockerId(),
+                        b.getBlockedId(),
+                        b.getCreatedAt()
+                ))
+                .toList();
     }
-
-
 }

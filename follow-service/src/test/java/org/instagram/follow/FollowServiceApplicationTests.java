@@ -6,15 +6,17 @@ import org.instagram.follow.repository.FollowRepository;
 import org.instagram.follow.service.FollowService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-
+@ExtendWith(MockitoExtension.class)
 class FollowServiceApplicationTests {
 
     @Mock
@@ -22,11 +24,6 @@ class FollowServiceApplicationTests {
 
     @InjectMocks
     private FollowService service;
-
-    @BeforeEach
-    void setup(){
-        MockitoAnnotations.openMocks(this);
-    }
 
 
     //TEST JAVNI PROFIL

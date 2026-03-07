@@ -1,7 +1,9 @@
 package org.instagram.follow.controller;
 
 
+import org.instagram.follow.dto.FollowRequestDto;
 import org.instagram.follow.service.FollowService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,15 +16,14 @@ public class FollowController {
         this.service= service;
     }
 
-    @PostMapping("/{followingId}")
-    public void follow(@PathVariable Long followingID,
-                       @RequestParam Long followerId,
-                       @RequestParam boolean isPrivate){
-        service.follow(followerId,followingID,isPrivate);
+    @PostMapping
+    public ResponseEntity<Void> follow(@RequestBody FollowRequestDto request){
+        service.follow(request.getFollowerId(),request.getFollowingId(),request.isPrivate());
+        return ResponseEntity.ok().build();
     }
-    @DeleteMapping("/{followingId}")
-    public void unfollow(@PathVariable Long followingId,
-                         @RequestParam Long followerId){
-        service.unfollow(followerId,followingId);
+    @DeleteMapping
+    public ResponseEntity<Void> unfollow(@RequestBody FollowRequestDto request){
+        service.unfollow(request.getFollowerId(),request.getFollowingId());
+        return ResponseEntity.ok().build();
     }
 }
