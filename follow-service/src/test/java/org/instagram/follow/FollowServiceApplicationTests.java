@@ -4,7 +4,6 @@ import org.instagram.follow.model.Follow;
 import org.instagram.follow.model.FollowStatus;
 import org.instagram.follow.repository.FollowRepository;
 import org.instagram.follow.service.FollowService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
