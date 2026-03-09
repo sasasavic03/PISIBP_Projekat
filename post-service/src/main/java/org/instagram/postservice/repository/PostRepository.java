@@ -10,5 +10,6 @@ public interface PostRepository extends JpaRepository<Post ,Long> {
     Optional<Post> findByIdAndIsActiveTrue(Long id);
     List<Post> findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(Long userId);
     Long countByUserIdAndIsActiveTrue(Long userId);
-
+    
+    List<Post> findByUserIdInAndIsActiveTrueOrderByCreatedAtDesc(List<Long> userIds);
 }
