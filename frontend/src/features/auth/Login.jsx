@@ -9,8 +9,38 @@ export default function Login(){
     const navigate = useNavigate();
 
 
-    const handleSubmit = (e)=>{
+    const handleSubmit = async (e)=>{
         e.preventDefault();
+
+        const payload = {
+            username,
+            password
+        };
+
+        try{
+            const response = await fetch("http://localhost:8080/api/auth/login",{
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if(!response.ok){
+                throw new Error("Login failed");
+            }
+
+            const data = await response.json();
+
+            console.log("Login succes", data);
+
+            if(data.token){
+                localStorage.setItem("token", data.token);
+            }
+            navigate("/feed");
+        } catch(error){
+            console.error("Login error:" , error);
+        }
 
         //Backend poziv
 

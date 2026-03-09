@@ -4,6 +4,7 @@ import Feed from "../features/posts/Feed";
 import ProfileTest from "../features/profile/ProfileTest";
 import Login from "../features/auth/Login";
 import Register from "../features/auth/Register";
+import ProfilePage from "../features/profile/ProfilePage";
 
 export default function AppRoutes() {
   return (
@@ -17,6 +18,12 @@ export default function AppRoutes() {
       <Route element={<Layout />}>
         <Route path="/feed" element={<Feed />} />
       </Route>
+
+      <Route element={<Layout />}>
+        <Route path="/profile" element={<ProfilePage />} />
+      </Route>
+
+
 
       
       <Route path="/profiletest" element={<ProfileTest/>} ></Route>

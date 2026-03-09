@@ -1,8 +1,9 @@
 import React from "react";
 import {Link, useNavigate} from "react-router-dom";
 import { useState } from "react";
-import "./login.css";
+import "./register.css";
 import CalendarIcon from "../../components/common/CalendarIcon";
+import {registerUser} from "../../api/authApi";
 
 export default function Login(){
     const [username, setUsername] = useState("");
@@ -13,7 +14,7 @@ export default function Login(){
 
 
 
-    const handleSubmit = (e)=>{
+    const handleSubmit = async (e)=>{ //Asinhrone f-je omogucavaju data fethcing, api pozive itd...
         e.preventDefault();
 
         //Backend poziv
@@ -24,11 +25,18 @@ export default function Login(){
             username,
             password,
             email,
-            dateOfBirth: selectedDate, 
-            dateOfBirthISO: selectedDate ? selectedDate.toISOString() : null,
+            dateOfBirth: selectedDate ? selectedDate.toISOString().split("T")[0] : null
+            
           };
+
+          try{
+            await registerUser(payload);
+            navigate("/login");
+          }catch(err){
+            console.error(err);
+          }
         
-          console.log(payload);
+          /* console.log(payload); */
 
   
 
@@ -48,16 +56,16 @@ export default function Login(){
                 <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
 
                 
-                    <h5>Date of birth</h5>
-                    <CalendarIcon value={selectedDate} onChange={setSelectedDate} />
+                    <p className="ig-date">Date of birth</p>
+                    <CalendarIcon className="ig-calendar" value={selectedDate} onChange={setSelectedDate} />
                 
 
                 <button type="submit">
                     Register
                 </button>
 
-                <p>
-                    You don't have an account? <Link to="/register">Regsiter now</Link>
+                <p className="ig-">
+                    You have an account? <Link to="/login">Login</Link>
                 </p>
 
             </form>
