@@ -1,6 +1,9 @@
 package org.instagram.interactionservice.controller;
 
 
+import jakarta.validation.Valid;
+import org.instagram.interactionservice.dto.LikeRequestDto;
+import org.instagram.interactionservice.dto.LikeResponseDto;
 import org.instagram.interactionservice.entity.Like;
 import org.instagram.interactionservice.service.LikeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/likes")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class LikeController {
 
     @Autowired
@@ -30,23 +35,21 @@ public class LikeController {
 
 
     @PostMapping
-    public ResponseEntity<?> likePost(@RequestBody Map<String, Object> request) {
-        try {
-            Long userId = Long.valueOf(request.get("userId").toString());
-            Long postId = Long.valueOf(request.get("postId").toString());
+    public ResponseEntity<?> likePost(@Valid @RequestBody LikeRequestDto request) {
+        Like like = likeService.likePost(request.getUserId(), request.getPostId());
 
-            Like like = likeService.likePost(userId, postId);
+        LikeResponseDto response = new LikeResponseDto(
+                like.getId(),
+                like.getUserId(),
+                like.getPostId(),
+                like.getCreatedAt()
+        );
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Post liked successfully");
-            response.put("like", like);
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "Post liked successfully");
+        result.put("like", response);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(createErrorResponse(e.getMessage()));
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
 
@@ -54,18 +57,12 @@ public class LikeController {
     public ResponseEntity<?> unlikePost(
             @RequestParam Long userId,
             @RequestParam Long postId) {
-        try {
-            likeService.unlikePost(userId, postId);
+        likeService.unlikePost(userId, postId);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Post unliked successfully");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Post unliked successfully");
 
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(createErrorResponse(e.getMessage()));
-        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/post/{postId}")
@@ -73,10 +70,19 @@ public class LikeController {
         List<Like> likes = likeService.getPostLikes(postId);
         Long count = likeService.getLikeCount(postId);
 
+        List<LikeResponseDto> likeDtos = likes.stream()
+                .map(like -> new LikeResponseDto(
+                        like.getId(),
+                        like.getUserId(),
+                        like.getPostId(),
+                        like.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+
         Map<String, Object> response = new HashMap<>();
         response.put("postId", postId);
         response.put("count", count);
-        response.put("likes", likes);
+        response.put("likes", likeDtos);
 
         return ResponseEntity.ok(response);
     }
@@ -106,9 +112,19 @@ public class LikeController {
 
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Like>> getUserLikes(@PathVariable Long userId) {
+    public ResponseEntity<List<LikeResponseDto>> getUserLikes(@PathVariable Long userId) {
         List<Like> likes = likeService.getUserLikes(userId);
-        return ResponseEntity.ok(likes);
+        
+        List<LikeResponseDto> likeDtos = likes.stream()
+                .map(like -> new LikeResponseDto(
+                        like.getId(),
+                        like.getUserId(),
+                        like.getPostId(),
+                        like.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(likeDtos);
     }
 
 

@@ -1,6 +1,10 @@
 package org.instagram.interactionservice.controller;
 
 
+import jakarta.validation.Valid;
+import org.instagram.interactionservice.dto.CommentRequestDto;
+import org.instagram.interactionservice.dto.CommentResponseDto;
+import org.instagram.interactionservice.dto.CommentUpdateDto;
 import org.instagram.interactionservice.entity.Comment;
 import org.instagram.interactionservice.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/comments")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class CommentController {
 
     @Autowired
@@ -31,23 +37,19 @@ public class CommentController {
     /**
      * Add a comment to a post
      * POST /api/comments
-     * Body: { "userId": 123, "postId": 1, "content": "Great post!", "parentCommentId": null }
+     * Body: { "userId": 123, "postId": 1, "content": "Great post!" }
      */
 
     @PostMapping
-    public ResponseEntity<?> addComment(@RequestBody Map<String, Object> request) {
-        try {
-            Long userId = Long.valueOf(request.get("userId").toString());
-            Long postId = Long.valueOf(request.get("postId").toString());
-            String content = (String) request.get("content");
+    public ResponseEntity<?> addComment(@Valid @RequestBody CommentRequestDto request) {
+        Comment comment = commentService.addComment(
+                request.getUserId(),
+                request.getPostId(),
+                request.getContent()
+        );
 
-            Comment comment = commentService.addComment(userId, postId, content );
-            return ResponseEntity.status(HttpStatus.CREATED).body(comment);
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(createErrorResponse(e.getMessage()));
-        }
+        CommentResponseDto response = mapToDto(comment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/post/{postId}")
@@ -55,59 +57,50 @@ public class CommentController {
         List<Comment> comments = commentService.getPostComments(postId);
         Long count = commentService.getCommentCount(postId);
 
+        List<CommentResponseDto> commentDtos = comments.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+
         Map<String, Object> response = new HashMap<>();
         response.put("postId", postId);
         response.put("count", count);
-        response.put("comments", comments);
+        response.put("comments", commentDtos);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{commentId}")
     public ResponseEntity<?> getComment(@PathVariable Long commentId) {
-        try {
-            Comment comment = commentService.getCommentById(commentId);
-            return ResponseEntity.ok(comment);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse(e.getMessage()));
-        }
+        Comment comment = commentService.getCommentById(commentId);
+        CommentResponseDto response = mapToDto(comment);
+        return ResponseEntity.ok(response);
     }
 
 
     @PatchMapping("/{commentId}")
     public ResponseEntity<?> updateComment(
             @PathVariable Long commentId,
-            @RequestBody Map<String, Object> request) {
-        try {
-            Long userId = Long.valueOf(request.get("userId").toString());
-            String content = (String) request.get("content");
-
-            Comment comment = commentService.updateComment(commentId, userId, content);
-            return ResponseEntity.ok(comment);
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(createErrorResponse(e.getMessage()));
-        }
+            @Valid @RequestBody CommentUpdateDto request) {
+        Comment comment = commentService.updateComment(
+                commentId,
+                request.getUserId(),
+                request.getContent()
+        );
+        
+        CommentResponseDto response = mapToDto(comment);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(
             @PathVariable Long commentId,
             @RequestParam Long userId) {
-        try {
-            commentService.deleteComment(commentId, userId);
+        commentService.deleteComment(commentId, userId);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Comment deleted successfully");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Comment deleted successfully");
 
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(createErrorResponse(e.getMessage()));
-        }
+        return ResponseEntity.ok(response);
     }
 
 
@@ -128,6 +121,16 @@ public class CommentController {
         return error;
     }
 
-
-
+    private CommentResponseDto mapToDto(Comment comment) {
+        return new CommentResponseDto(
+                comment.getId(),
+                comment.getUserId(),
+                comment.getPostId(),
+                comment.getContent(),
+                comment.getIsEdited(),
+                comment.getIsDeleted(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt()
+        );
+    }
 }

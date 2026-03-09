@@ -2,6 +2,8 @@ package org.instagram.interactionservice.service;
 
 
 import org.instagram.interactionservice.entity.Like;
+import org.instagram.interactionservice.exception.BadRequestException;
+import org.instagram.interactionservice.exception.ResourceNotFoundException;
 import org.instagram.interactionservice.repository.LikeRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ public class LikeService {
     @Transactional
     public Like likePost(Long userId, Long postId) {
         if (likeRepository.existsByUserIdAndPostId(userId, postId)) {
-            throw new RuntimeException("You already liked this post");
+            throw new BadRequestException("You already liked this post");
         }
 
 
@@ -42,7 +44,7 @@ public class LikeService {
     @Transactional
     public void unlikePost(Long userId, Long postId) {
         Like like = likeRepository.findByUserIdAndPostId(userId, postId)
-                .orElseThrow(() -> new RuntimeException("You haven't liked this post"));
+                .orElseThrow(() -> new ResourceNotFoundException("You haven't liked this post"));
 
         likeRepository.delete(like);
 
