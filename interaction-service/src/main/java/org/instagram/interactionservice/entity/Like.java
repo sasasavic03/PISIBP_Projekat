@@ -3,7 +3,6 @@ package org.instagram.interactionservice.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.core.SpringVersion;
 
 import java.time.LocalDateTime;
 

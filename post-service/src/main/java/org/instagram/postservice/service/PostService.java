@@ -61,6 +61,13 @@ public class PostService {
     public List<Post> getUserPosts(Long userId) {
         return postRepository.findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(userId);
     }
+    
+    public List<Post> getPostsByUserIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+        return postRepository.findByUserIdInAndIsActiveTrueOrderByCreatedAtDesc(userIds);
+    }
 
 
     @Transactional
