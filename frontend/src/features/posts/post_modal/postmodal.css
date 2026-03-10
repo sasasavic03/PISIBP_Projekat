@@ -119,3 +119,29 @@
   .ig-modal-add-comment button:hover{
     background:var(--ig-btn-hover);
   }
+
+
+  
+
+  .ig-modal-image .ig-carousel_dots {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .ig-modal-image .ig-carousel_dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  
+  .ig-modal-image .ig-carousel_dot.active {
+    background: white;
+    transform: scale(1.2);
+  }
