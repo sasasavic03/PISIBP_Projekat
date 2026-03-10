@@ -18,7 +18,6 @@ public class LikeService {
     @Autowired
     private LikeRepository likeRepository;
 
-    // KASNIJE POSTAVITI PRAVI PORT
     @Value("${post.service.url}")
     private String postServiceUrl;
 

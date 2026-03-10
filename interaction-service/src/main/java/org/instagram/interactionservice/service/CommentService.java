@@ -20,7 +20,6 @@ public class CommentService {
     @Autowired
     private CommentRepository commentRepository;
 
-    // KASNIJE POSTAVITI PRAVI PORT
     @Value("${post.service.url}")
     private String postServiceUrl;
 
