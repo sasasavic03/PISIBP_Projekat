@@ -66,6 +66,19 @@ public class PostController {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }
+    
+    @PostMapping("/feed")
+    public ResponseEntity<?> getPostsByUserIds(@RequestBody Map<String, Object> request) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Long> userIds = (List<Long>) request.get("userIds");
+            
+            List<Post> posts = postService.getPostsByUserIds(userIds);
+            return ResponseEntity.ok(posts);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
 
 
     @PatchMapping("/{id}/description")

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import PostModal from "./PostModal";
+import PostModal from "../posts/post_modal/PostModal";
 import "./postsgrid.css";
 import{
     FiHeart,

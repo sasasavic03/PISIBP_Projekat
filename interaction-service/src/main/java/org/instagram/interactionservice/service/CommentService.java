@@ -2,6 +2,9 @@ package org.instagram.interactionservice.service;
 
 
 import org.instagram.interactionservice.entity.Comment;
+import org.instagram.interactionservice.exception.BadRequestException;
+import org.instagram.interactionservice.exception.ResourceNotFoundException;
+import org.instagram.interactionservice.exception.UnauthorizedException;
 import org.instagram.interactionservice.repository.CommentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,6 @@ public class CommentService {
     @Autowired
     private CommentRepository commentRepository;
 
-    // KASNIJE POSTAVITI PRAVI PORT
     @Value("${post.service.url}")
     private String postServiceUrl;
 
@@ -25,11 +27,11 @@ public class CommentService {
     @Transactional
     public Comment addComment(Long userId, Long postId, String content ) {
         if (content == null || content.trim().isEmpty()) {
-            throw new RuntimeException("Comment content cannot be empty");
+            throw new BadRequestException("Comment content cannot be empty");
         }
 
         if (content.length() > 2200) {
-            throw new RuntimeException("Comment too long (max 2200 characters)");
+            throw new BadRequestException("Comment too long (max 2200 characters)");
         }
         // Create comment
         Comment comment = new Comment();
@@ -52,7 +54,7 @@ public class CommentService {
 
     public Comment getCommentById(Long commentId) {
         return commentRepository.findByIdAndIsDeletedFalse(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
     }
 
 
@@ -62,15 +64,15 @@ public class CommentService {
         Comment comment = getCommentById(commentId);
 
         if (!comment.getUserId().equals(userId)) {
-            throw new RuntimeException("You can only edit your own comments");
+            throw new UnauthorizedException("You can only edit your own comments");
         }
 
         if (newContent == null || newContent.trim().isEmpty()) {
-            throw new RuntimeException("Comment content cannot be empty");
+            throw new BadRequestException("Comment content cannot be empty");
         }
 
         if (newContent.length() > 2200) {
-            throw new RuntimeException("Comment too long (max 2200 characters)");
+            throw new BadRequestException("Comment too long (max 2200 characters)");
         }
 
         comment.setContent(newContent.trim());
@@ -84,7 +86,7 @@ public class CommentService {
         Comment comment = getCommentById(commentId);
         
         if (!comment.getUserId().equals(userId)) {
-            throw new RuntimeException("You can only delete your own comments");
+            throw new UnauthorizedException("You can only delete your own comments");
         }
         
         comment.setIsDeleted(true);
