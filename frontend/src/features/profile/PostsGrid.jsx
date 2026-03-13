@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
-import PostModal from "./PostModal";
+import PostModal from "../posts/post_modal/PostModal";
 import "./postsgrid.css";
 import{
     FiHeart,
     FiMessageSquare
 }from "react-icons/fi";
 
-export default function PostsGrid({ posts }) {
+export default function PostsGrid({ posts: initialPosts, isOwnProfile }) {
 
+  const [posts, setPosts] = useState(initialPosts);
   const [selectedPost, setSelectedPost] = useState(null);
   const [visiblePosts, setVisiblePosts] = useState([]);
 
   const loaderRef = useRef(null);
-
   const POSTS_PER_LOAD = 6;
 
   useEffect(() => {
@@ -55,6 +55,23 @@ export default function PostsGrid({ posts }) {
 
   },[visiblePosts]);
 
+  function handleDeletePost(postId) {
+    const updated = posts.filter(p => p.id !== postId);
+    setPosts(updated);
+    setSelectedPost(null);
+  }
+
+  function handleDeleteImage(postId, imageIndex) {
+    const updated = posts.map(p => {
+      if (p.id !== postId) return p;
+      const updatedImages = p.images.filter((_, i) => i !== imageIndex);
+      return { ...p, images: updatedImages, image: updatedImages[0] };
+    });
+    setPosts(updated);
+    // azuriraj selectedPost da carousel odmah reflektuje promenu
+    const updatedPost = updated.find(p => p.id === postId);
+    setSelectedPost(updatedPost);
+  }
 
 
 
@@ -87,6 +104,9 @@ export default function PostsGrid({ posts }) {
         <PostModal
           post={selectedPost}
           onClose={() => setSelectedPost(null)}
+          isOwner={isOwnProfile}
+          onDeletePost={handleDeletePost}
+          onDeleteImage={handleDeleteImage}
         />
       )}
 </>

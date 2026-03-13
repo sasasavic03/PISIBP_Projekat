@@ -5,6 +5,7 @@ import ProfileTest from "../features/profile/ProfileTest";
 import Login from "../features/auth/Login";
 import Register from "../features/auth/Register";
 import ProfilePage from "../features/profile/ProfilePage";
+import Settings from "../features/settings/Settings";
 
 export default function AppRoutes() {
   return (
@@ -20,7 +21,11 @@ export default function AppRoutes() {
       </Route>
 
       <Route element={<Layout />}>
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/:username" element={<ProfilePage />} />
+      </Route>
+
+      <Route element={<Layout/>}>
+        <Route path="/settings" element={<Settings/>} />
       </Route>
 
 

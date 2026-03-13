@@ -17,8 +17,10 @@ export default function PostList(){
                     author = {post.author}
                     content = {post.content}        
                     avatar={post.avatar}
-                    image={post.image}
+                    images={post.images}
                     likes={post.likes}
+                    comments={post.comments}
+                    likedBy={post.likedBy}
                 
                             
                 />

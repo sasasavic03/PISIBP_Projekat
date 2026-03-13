@@ -1,0 +1,319 @@
+
+:root {
+  --ig-border: #dbdbdb;
+  --ig-text: #0f0f0f;
+  --ig-muted: #737373;
+  --ig-hover: #f2f2f2;
+  --ig-bg: #ffffff;
+}
+
+.ig-modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+  }
+  
+  .ig-modal{
+    display:flex;
+    width:900px;
+    height:600px;
+    background:var(--ig-bg);
+  }
+  
+  .ig-modal-image{
+    flex:1;
+    background:black;
+    position:relative;
+    cursor:pointer;
+  }
+
+  .ig-heart-animation{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%) scale(0.5);
+    font-size:90px;
+    opacity:0;
+    animation:heartPop 0.7s ease forwards;
+  }
+  
+  @keyframes heartPop{
+  
+    0%{
+      transform:translate(-50%, -50%) scale(0.5);
+      opacity:0;
+    }
+  
+    30%{
+      transform:translate(-50%, -50%) scale(1.2);
+      opacity:1;
+    }
+  
+    60%{
+      transform:translate(-50%, -50%) scale(1);
+      opacity:1;
+    }
+  
+    100%{
+      transform:translate(-50%, -50%) scale(1);
+      opacity:0;
+    }
+  
+  }
+  
+  .ig-modal-image img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  
+  .ig-modal-side{
+    width:350px;
+    display:flex;
+    flex-direction:column;
+    border-left:1px solid var(--ig-border);
+  }
+  
+  .ig-modal-header{
+    padding:12px;
+    border-bottom:1px solid var(--ig-border);
+  }
+  
+  .ig-modal-comments{
+    flex:1;
+    overflow-y:auto;
+    padding:12px;
+  }
+  
+  .ig-comment{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .ig-comment-avatar{
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  
+
+  .ig-comment_profile{
+    color: var(--ig-text);
+  }
+  
+  .ig-modal-actions{
+    padding:10px;
+    border-top:1px solid var(--ig-border);
+  }
+  
+  .ig-modal-actions button{
+    background:none;
+    border:none;
+    font-size:16px;
+    cursor:pointer;
+  }
+  
+  .ig-modal-add-comment{
+    display:flex;
+    border-top:1px solid var(--ig-border);
+  }
+  
+  .ig-modal-add-comment input{
+    flex:1;
+    border:none;
+    padding:10px;
+    outline:none;
+    background-color:var(--ig-bg);
+    border-radius: 50;
+    color: var(--ig-text);
+  }
+  
+  .ig-modal-add-comment button{
+    border:none;
+    background:var(--ig-btn);
+    color:white;
+    padding:0 16px;
+    cursor:pointer;
+  }
+  
+  .ig-modal-add-comment button:hover{
+    background:var(--ig-btn-hover);
+  }
+
+
+  
+
+  .ig-modal-image .ig-carousel_dots {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .ig-modal-image .ig-carousel_dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  
+  .ig-modal-image .ig-carousel_dot.active {
+    background: white;
+    transform: scale(1.2);
+  }
+
+  .ig-modal-liked-by {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--ig-border);
+  flex-wrap: wrap;
+}
+
+.ig-modal-liked-avatars {
+  display: flex;
+}
+
+.ig-modal-liked-avatars img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-left: -6px;
+  object-fit: cover;
+}
+
+.ig-modal-liked-avatars img:first-child {
+  margin-left: 0;
+}
+
+.ig-modal-liked-text {
+  font-size: 13px;
+  color: var(--ig-text);
+}
+
+.ig-modal-liked-text strong {
+  font-weight: 600;
+}
+
+/* Liked by avatari */
+
+.ig-modal-liked-by {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--ig-border);
+  flex-wrap: wrap;
+}
+
+.ig-modal-liked-avatars {
+  display: flex;
+}
+
+.ig-modal-liked-avatars img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-left: -6px;
+  object-fit: cover;
+}
+
+.ig-modal-liked-avatars img:first-child {
+  margin-left: 0;
+}
+
+.ig-modal-liked-text {
+  font-size: 13px;
+  color: var(--ig-text);
+}
+
+.ig-modal-liked-text strong {
+  font-weight: 600;
+}
+
+
+.ig-liked-by-others {
+  cursor: pointer;
+}
+
+.ig-liked-by-others:hover {
+  text-decoration: underline;
+}
+
+.ig-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ig-modal-options-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--ig-text);
+  letter-spacing: 2px;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+.ig-modal-options-btn:hover {
+  color: var(--ig-muted);
+}
+
+/* .ig-post_options_item{
+  background-color: var(--ig-btn);
+  color: var(--ig-bg);
+  border-color: var(--ig-text);
+  border-radius: 0;
+}
+ */
+
+/*  .ig-post_options_backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  z-index: 2000;
+  padding-top: 80px;
+  padding-right: calc(50% - 450px);
+} */
+
+.ig-post_options_item{
+  border-radius: 0;
+  background-color: var(--ig-btn);
+}
+
+.ig-post_options_item:hover{
+  background-color: var(--ig-btn-hover);
+}
+
+.ig-post_options_backdrop{
+  padding-bottom:475px;
+}
+
+.ig-post_options_panel {
+  background: var(--ig-bg);
+  border-radius: 12px;
+  width: 200px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

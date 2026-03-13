@@ -1,0 +1,133 @@
+.ig-searchpanel {
+    position: fixed;
+    top: 0;
+    left: 260px;
+    height: 100vh;
+    width: 320px;
+    background: var(--ig-bg);
+    border-right: 1px solid var(--ig-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 40;
+    animation: slideIn 0.2s ease;
+  }
+  
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  
+  @media (max-width: 1100px) {
+    .ig-searchpanel {
+      left: 82px;
+    }
+  }
+  
+  .ig-searchpanel-header {
+    padding: 24px 20px 16px;
+  }
+  
+  .ig-searchpanel-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ig-text);
+    margin: 0;
+  }
+  
+  .ig-searchpanel-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 16px;
+    padding: 10px 14px;
+    background: var(--ig-hover);
+    border-radius: 10px;
+  }
+  
+  .ig-searchpanel-icon {
+    color: var(--ig-muted);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  
+  .ig-searchpanel-input-wrap input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: var(--ig-text);
+  }
+  
+  .ig-searchpanel-input-wrap input::placeholder {
+    color: var(--ig-muted);
+  }
+  
+  .ig-searchpanel-clear {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ig-muted);
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+  
+  .ig-searchpanel-clear:hover {
+    color: var(--ig-text);
+  }
+  
+  .ig-searchpanel-divider {
+    height: 1px;
+    background: var(--ig-border);
+    margin: 16px 0 8px;
+  }
+  
+  .ig-searchpanel-hint {
+    padding: 16px 20px;
+    color: var(--ig-muted);
+    font-size: 14px;
+  }
+  
+  .ig-searchpanel-results {
+    overflow-y: auto;
+    flex: 1;
+  }
+  
+  .ig-searchpanel-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: var(--ig-text);
+    transition: background 0.15s;
+  }
+  
+  .ig-searchpanel-item:hover {
+    background: var(--ig-hover);
+  }
+  
+  .ig-searchpanel-item img {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--ig-border);
+  }
+  
+  .ig-searchpanel-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .ig-searchpanel-username {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .ig-searchpanel-fullname {
+    font-size: 13px;
+    color: var(--ig-muted);
+  }

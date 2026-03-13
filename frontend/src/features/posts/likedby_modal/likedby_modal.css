@@ -1,0 +1,86 @@
+.ig-likedby-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+  
+  .ig-likedby-modal {
+    background: var(--ig-bg);
+    border-radius: 12px;
+    width: 400px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .ig-likedby-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--ig-border);
+    position: relative;
+    font-weight: 600;
+    font-size: 16px;
+  }
+  
+  .ig-likedby-close {
+    position: absolute;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--ig-text);
+    line-height: 1;
+  }
+  
+  .ig-likedby-list {
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+  
+  .ig-likedby-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    transition: background 0.15s;
+  }
+  
+  .ig-likedby-item:hover {
+    background: var(--ig-hover);
+  }
+  
+  .ig-likedby-item img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--ig-border);
+  }
+  
+  .ig-likedby-username {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ig-text);
+  }
+  
+  .ig-likedby-follow-btn {
+    background: none;
+    border: none;
+    color: #0095f6;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .ig-likedby-follow-btn:hover {
+    color: #1877f2;
+  }

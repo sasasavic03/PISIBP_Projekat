@@ -1,12 +1,14 @@
 package org.instagram.follow.service;
 
 import jakarta.transaction.Transactional;
+import org.instagram.follow.dto.FollowResponseDto;
 import org.instagram.follow.model.Follow;
 import org.instagram.follow.model.FollowStatus;
 import org.instagram.follow.repository.FollowRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class FollowService {
@@ -38,4 +40,31 @@ public class FollowService {
 
         repository.delete(follow);
     }
+
+    public List<FollowResponseDto> getFollowers(Long userId){
+        return repository.findByFollowingIdAndStatus(userId,FollowStatus.ACCEPTED)
+                .stream()
+                .map(f-> new FollowResponseDto(
+                        f.getId(),
+                        f.getFollowerid(),
+                        f.getFollowingId(),
+                        f.getStatus(),
+                        f.getCreateAt()
+                ))
+                .toList();
+    }
+
+    public List<FollowResponseDto> getFollowing(Long userId){
+        return repository.findByFollowerIdAndStatus(userId,FollowStatus.ACCEPTED)
+                .stream()
+                .map(f-> new FollowResponseDto(
+                        f.getId(),
+                        f.getFollowerid(),
+                        f.getFollowingId(),
+                        f.getStatus(),
+                        f.getCreateAt()
+                ))
+                .toList();
+    }
 }
+

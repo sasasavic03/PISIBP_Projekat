@@ -1,15 +1,10 @@
 import React from "react"
 import {Link} from "react-router-dom"
 import "./suggestions.css"
+import suggestionsMock from "../../../data/suggestions.mock";
 
+const users = suggestionsMock;
 
-const users =[
-  {id: 1, avatar: './2145.jpg', username: "moe_lester", followedBy: "marko.galetin"},
-  {id: 2, avatar: './avatar1.jpg', username: "diddler", followedBy: "epstein1312"},
-  {id: 3, avatar: './void_vance.jpg', username: "void_vance", followedBy: "lildTrump"},
-  {id: 4, avatar: './a78.jpg', username: "kirkjerk", followedBy: "nikola.tesla"},
-  {id: 5, avatar: './kjasdkajsn.jpg', username: "aghartakirk", followedBy: "volodymir.zelenski"},
-];
 
 export default function Suggestions() {
   return (
@@ -24,7 +19,7 @@ export default function Suggestions() {
         <ol className="ig-suggestions_list">
           {users.map(user => (
             <li key={user.id} className="ig-suggestions_item">
-                <Link to={`/${user.username}`} className="ig-suggestions_link">
+                <Link to={`/profile/${user.username}`} className="ig-suggestions_link">
     
         <img
           src={user.avatar}
