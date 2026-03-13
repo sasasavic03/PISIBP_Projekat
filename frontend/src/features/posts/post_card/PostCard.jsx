@@ -8,9 +8,10 @@ export default function PostCard({
   author,
   avatar,
   images,
-  likes:initialLikes,
+  likes: initialLikes,
   content,
-  comments = []
+  comments = [],
+  likedBy: initialLikedBy = []
 }) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,16 +20,12 @@ export default function PostCard({
   const [showModal, setShowModal] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
 
-  function nextImage(){
-    setCurrentIndex((prev)=>
-      prev === images.length - 1 ? prev : prev + 1
-    );
+  function nextImage() {
+    setCurrentIndex((prev) => prev === images.length - 1 ? prev : prev + 1);
   }
 
-  function prevImage(){
-    setCurrentIndex((prev)=>
-      prev === 0 ? prev : prev - 1
-    );
+  function prevImage() {
+    setCurrentIndex((prev) => prev === 0 ? prev : prev - 1);
   }
 
   function toggleLike() {
@@ -53,6 +50,8 @@ export default function PostCard({
   const postForModal = {
     images,
     username: author,
+    avatar,        
+    content,
     likes,
     comments,
   };
@@ -75,32 +74,22 @@ export default function PostCard({
       {/* image carousel */}
       <div className="ig-post_media" onDoubleClick={doubleClickLike}>
 
-        <img
-          src={images[currentIndex]}
-          alt="post"
-        />
+        <img src={images[currentIndex]} alt="post" />
 
         {showHeart && (
-            <div className="ig-heart-animation">❤️</div>
-         )}
+          <div className="ig-heart-animation">❤️</div>
+        )}
 
         {images.length > 1 && (
           <>
             {currentIndex > 0 && (
-              <button
-                className="ig-carousel_btn ig-prev"
-                onClick={prevImage}
-              >
-                <FiChevronLeft  />
+              <button className="ig-carousel_btn ig-prev" onClick={prevImage}>
+                <FiChevronLeft />
               </button>
             )}
-
             {currentIndex < images.length - 1 && (
-              <button
-                className="ig-carousel_btn ig-next"
-                onClick={nextImage}
-              >
-                <FiChevronRight  />
+              <button className="ig-carousel_btn ig-next" onClick={nextImage}>
+                <FiChevronRight />
               </button>
             )}
           </>
@@ -108,7 +97,7 @@ export default function PostCard({
 
       </div>
 
-      {/* carousel tacke */}
+      {/* carousel dots */}
       {images.length > 1 && (
         <div className="ig-carousel_dots">
           {images.map((_, i) => (
@@ -138,11 +127,12 @@ export default function PostCard({
       <div className="ig-post_content">
         <p className="ig-post_likes">{likes} likes</p>
         <p>
-          <span className="ig-post_username">{author}</span>{" "}
+          <span className="ig-post_username">
+            <Link to={`/profile/${author}`} className="ig-comment_user">{author}</Link>
+          </span>{" "}
           {content}
         </p>
       </div>
-
 
       {/* modal */}
       {showModal && (

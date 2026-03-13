@@ -3,3 +3,77 @@
     margin: 0 auto;   
     padding-top: 30px;
 }
+
+.ig-blocked-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 60px 20px;
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .ig-blocked-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--ig-border);
+    filter: grayscale(100%);
+    opacity: 0.6;
+  }
+  
+  .ig-blocked-username {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ig-text);
+  }
+  
+  .ig-blocked-text {
+    font-size: 14px;
+    color: var(--ig-muted);
+  }
+  
+  .ig-blocked-unblock-btn {
+    background: none;
+    border: none;
+    color: #0095f6;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  
+  .ig-blocked-unblock-btn:hover {
+    color: #1877f2;
+  }
+
+
+  .ig-private-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 20px;
+    border-top: 1px solid var(--ig-border);
+    text-align: center;
+  }
+  
+  .ig-private-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+  }
+  
+  .ig-private-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ig-text);
+    margin: 0;
+  }
+  
+  .ig-private-text {
+    font-size: 14px;
+    color: var(--ig-muted);
+    margin: 0;
+  }

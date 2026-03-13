@@ -1,0 +1,243 @@
+:root {
+    --ig-border: #dbdbdb;
+    --ig-text: #0f0f0f;
+    --ig-muted: #737373;
+    --ig-hover: #f2f2f2;
+    --ig-bg: #ffffff;
+    --ig-btn: #0095f6;
+    --ig-btn-hover: #1877f2;
+  }
+  
+  .ig-settings-layout {
+    display: flex;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    align-items: flex-start;
+  }
+  
+  /* LEVA STRANA */
+  .ig-settings {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--ig-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .ig-settings-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--ig-border);
+  }
+  
+  .ig-settings-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ig-text);
+    margin: 0;
+  }
+  
+  .ig-settings-form {
+    display: flex;
+    flex-direction: column;
+    padding: 0 24px;
+  }
+  
+  /* avatar row */
+  .ig-settings-avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+  }
+  
+  .ig-settings-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--ig-border);
+  }
+  
+  .ig-settings-avatar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .ig-settings-username {
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ig-text);
+  }
+  
+  .ig-settings-avatar-btn {
+    color: #0095f6;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .ig-settings-avatar-btn:hover {
+    color: #1877f2;
+  }
+  
+  /* grid za fieldove */
+  .ig-settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 32px;
+  }
+  
+  .ig-settings-grid .ig-settings-divider {
+    grid-column: 1 / -1;
+  }
+  
+  .ig-settings-full {
+    grid-column: 1 / -1;
+  }
+  
+  /* rows */
+  .ig-settings-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 0;
+  }
+  
+  .ig-settings-row label {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ig-text);
+  }
+  
+  .ig-settings-row input,
+  .ig-settings-row textarea {
+    border: 1px solid var(--ig-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    color: var(--ig-text);
+    background: var(--ig-bg);
+    outline: none;
+    resize: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  
+  .ig-settings-row input:focus,
+  .ig-settings-row textarea:focus {
+    border-color: #a8a8a8;
+  }
+  
+  .ig-settings-charcount {
+    font-size: 12px;
+    color: var(--ig-muted);
+    text-align: right;
+  }
+  
+  /* divider */
+  .ig-settings-divider {
+    height: 1px;
+    background: var(--ig-border);
+  }
+  
+  /* footer */
+  .ig-settings-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 20px 0;
+    grid-column: 1 / -1;
+  }
+  
+  .ig-settings-saved {
+    color: #2ecc71;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .ig-settings-submit {
+    background: #0095f6;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .ig-settings-submit:hover {
+    background: #1877f2;
+  }
+  
+  /* DESNA STRANA */
+  .ig-settings-blocked {
+    width: 360px;
+    flex-shrink: 0;
+    border: 1px solid var(--ig-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .ig-settings-blocked .ig-settings-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--ig-border);
+  }
+  
+  .ig-settings-blocked-empty {
+    padding: 24px;
+    color: var(--ig-muted);
+    font-size: 15px;
+  }
+  
+  .ig-settings-blocked-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .ig-settings-blocked-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 24px;
+    transition: background 0.15s;
+  }
+  
+  .ig-settings-blocked-item:hover {
+    background: var(--ig-hover);
+  }
+  
+  .ig-settings-blocked-item img {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--ig-border);
+  }
+  
+  .ig-settings-blocked-username {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ig-text);
+  }
+  
+  .ig-settings-unblock-btn {
+    background: none;
+    border: none;
+    color: #0095f6;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .ig-settings-unblock-btn:hover {
+    color: #1877f2;
+  }

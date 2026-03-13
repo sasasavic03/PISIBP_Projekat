@@ -1,0 +1,161 @@
+.ig-notif-panel {
+    position: fixed;
+    top: 0;
+    left: 260px;
+    height: 100vh;
+    width: 360px;
+    background: var(--ig-bg);
+    border-right: 1px solid var(--ig-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 40;
+    animation: slideIn 0.2s ease;
+  }
+  
+  @media (max-width: 1100px) {
+    .ig-notif-panel {
+      left: 82px;
+    }
+  }
+  
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  
+  .ig-notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 20px 16px;
+  }
+  
+  .ig-notif-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ig-text);
+    margin: 0;
+  }
+  
+  .ig-notif-markread {
+    background: none;
+    border: none;
+    color: #0095f6;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  
+  .ig-notif-markread:hover {
+    color: #1877f2;
+  }
+  
+  .ig-notif-divider {
+    height: 1px;
+    background: var(--ig-border);
+  }
+  
+  .ig-notif-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px 0;
+  }
+  
+  .ig-notif-empty {
+    padding: 20px;
+    color: var(--ig-muted);
+    font-size: 14px;
+  }
+  
+  .ig-notif-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    transition: background 0.15s;
+  }
+  
+  .ig-notif-item:hover {
+    background: var(--ig-hover);
+  }
+  
+  .ig-notif-item.unread {
+    background: #f0f7ff;
+  }
+  
+  .ig-notif-item.unread:hover {
+    background: #e3f0ff;
+  }
+  
+  .ig-notif-avatar-link img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--ig-border);
+    flex-shrink: 0;
+  }
+  
+  .ig-notif-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .ig-notif-text {
+    font-size: 14px;
+    color: var(--ig-text);
+    margin: 0 0 2px;
+    line-height: 1.4;
+  }
+  
+  .ig-notif-username {
+    font-weight: 600;
+    color: var(--ig-text);
+    text-decoration: none;
+  }
+  
+  .ig-notif-username:hover {
+    text-decoration: underline;
+  }
+  
+  .ig-notif-time {
+    font-size: 12px;
+    color: var(--ig-muted);
+  }
+  
+  .ig-notif-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  
+  .ig-notif-accept {
+    background: #0095f6;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  
+  .ig-notif-accept:hover {
+    background: #1877f2;
+  }
+  
+  .ig-notif-decline {
+    background: var(--ig-hover);
+    color: var(--ig-text);
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  
+  .ig-notif-decline:hover {
+    background: var(--ig-border);
+  }

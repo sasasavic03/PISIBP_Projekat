@@ -1,7 +1,29 @@
-import React from "react";
+import React, { useState} from "react";
+import { Link } from "react-router-dom";
 import "./profileheader.css";
+import FollowersModal from "./followersmodal/FollowersModal";
+import ProfileOptionsModal from "./profile_options_modal/ProfileOptionsModal";
 
 export default function ProfileHeader({ user, stats, isOwnProfile }) {
+
+  const [modalType, setModalType] = useState(null);
+  const [followed, setFollowed] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [requested, setRequested] = useState(false);
+
+  function handleFollow() {                             
+    if (followed) {
+      setFollowed(false);
+      setRequested(false);
+    } else if (user?.isPrivate && !requested) {
+      setRequested(true);
+    } else if (requested) {
+      setRequested(false);
+    } else {
+      setFollowed(true);
+    }
+  }
+
 
   return (
     <div className="ig-profile-header">
@@ -16,22 +38,43 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
           <h2 className="ig-username">{user?.username}</h2>
 
           {isOwnProfile ? (
-            <button className="ig-edit-btn">
-              Edit profile
-            </button>
-          ) : (
-            <div className="ig-profile-actions">
-
-              <button className="ig-follow-btn">
-                Follow
-              </button>
-
-              <button className="ig-message-btn">
-                Message
-              </button>
-
+            <div>
+              <Link to="/settings" className="ig-settings-btn">Settings</Link>
             </div>
+            
+            
+          ) : (
+            
+
+              
+              <div className="ig-profile-actions">
+                <button
+                  className={followed ? "ig-unfollow-btn" :
+                            requested ? "ig-requested-btn" :
+                            "ig-follow-btn"
+                            }
+                  onClick={handleFollow}
+                >
+                  {followed ? "Unfollow" : requested ? "Requested" : "Follow"}
+                </button>
+
+
+                <button className="ig-message-btn">Message</button>
+
+                <button className="ig-options-btn" onClick={() => setShowOptions(true)}>
+                  ···
+                </button>
+              </div>
+    
           )}
+
+            {showOptions && (
+              <ProfileOptionsModal onClose={() => setShowOptions(false)} />
+            )}
+
+
+
+          
 
         </div>
 
@@ -45,15 +88,29 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
             <strong>{stats.posts}</strong> posts
           </span>
 
-          <span>
+          <span
+            style={{ cursor: "pointer" }}
+            onClick={() => setModalType("followers")}
+          >
             <strong>{stats.followers}</strong> followers
           </span>
 
-          <span>
+          <span
+            style={{ cursor: "pointer" }}
+            onClick={() => setModalType("following")}
+          >
             <strong>{stats.following}</strong> following
           </span>
         </div>
 
+
+        {modalType && (
+          <FollowersModal
+            type={modalType}
+            users={modalType === "followers" ? user.followers : user.following}
+            onClose={() => setModalType(null)}
+          />
+        )}
         
 
         {/* Followed by sekcija */}

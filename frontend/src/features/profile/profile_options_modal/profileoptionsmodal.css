@@ -1,0 +1,41 @@
+.ig-profileoptions-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+  
+  .ig-profileoptions-panel {
+    background: var(--ig-bg);
+    border-radius: 12px;
+    width: 400px;
+    overflow: hidden;
+  }
+  
+  .ig-profileoptions-item {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 14px;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--ig-text);
+    transition: background 0.15s;
+  }
+  
+  .ig-profileoptions-item:hover {
+    background: var(--ig-hover);
+  }
+  
+  .ig-profileoptions-danger {
+    color: #ed4956;
+    font-weight: 600;
+  }
+  
+  .ig-profileoptions-divider {
+    height: 1px;
+    background: var(--ig-border);
+  }

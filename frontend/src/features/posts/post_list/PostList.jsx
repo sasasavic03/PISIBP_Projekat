@@ -20,6 +20,7 @@ export default function PostList(){
                     images={post.images}
                     likes={post.likes}
                     comments={post.comments}
+                    likedBy={post.likedBy}
                 
                             
                 />
