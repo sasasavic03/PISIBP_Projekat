@@ -7,7 +7,12 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "likes", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id","post_id"}))
+@Table(name = "likes", 
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id","post_id"}),
+        indexes = {
+            @Index(name = "idx_like_post_id", columnList = "post_id"),
+            @Index(name = "idx_like_user_id", columnList = "user_id")
+        })
 @Data
 public class Like {
 
