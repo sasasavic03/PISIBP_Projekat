@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.instagram.postservice.client.UserServiceClient;
+import org.instagram.postservice.entity.Media;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PostResponseDTO {
+public class PostWithUserDTO {
 
     private Long id;
 
@@ -23,7 +25,7 @@ public class PostResponseDTO {
     private String description;
 
     @JsonProperty("media_list")
-    private List<MediaDTO> mediaList;
+    private List<Media> mediaList;
 
     @JsonProperty("media_count")
     private Integer mediaCount;
@@ -43,23 +45,5 @@ public class PostResponseDTO {
     @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class MediaDTO {
-        private Long id;
-
-        @JsonProperty("media_url")
-        private String mediaUrl;
-
-        @JsonProperty("media_type")
-        private String mediaType;
-
-        @JsonProperty("order_index")
-        private Integer orderIndex;
-
-        @JsonProperty("created_at")
-        private LocalDateTime createdAt;
-    }
+    private UserServiceClient.UserResponse user;
 }

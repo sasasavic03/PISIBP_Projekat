@@ -1,12 +1,18 @@
 package org.instagram.postservice.service;
 
 import jakarta.transaction.Transactional;
+import org.instagram.postservice.client.InteractionServiceClient;
+import org.instagram.postservice.client.UserServiceClient;
 import org.instagram.postservice.entity.Media;
 import org.instagram.postservice.entity.Post;
+import org.instagram.postservice.exception.BadRequestException;
+import org.instagram.postservice.exception.ResourceNotFoundException;
+import org.instagram.postservice.exception.UnauthorizedException;
 import org.instagram.postservice.repository.MediaRepository;
 import org.instagram.postservice.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,30 +26,42 @@ public class PostService {
     @Autowired
     private MediaRepository mediaRepository;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @Autowired
+    private InteractionServiceClient interactionServiceClient;
+
+    @Autowired
+    private UserServiceClient userServiceClient;
+
     private static final int MAX_MEDIA_COUNT = 20;
 
     @Transactional
-    public Post createPost(Long userId , String description, List<String> mediaUrls) {
-        if (mediaUrls == null || mediaUrls.isEmpty()) {
-            throw new RuntimeException("At least one media is required");
+    public Post createPost(Long userId, String description, List<MultipartFile> mediaFiles) {
+        if (mediaFiles == null || mediaFiles.isEmpty()) {
+            throw new BadRequestException("At least one media is required");
         }
-        if (mediaUrls.size() > MAX_MEDIA_COUNT) {
-            throw new RuntimeException("Maximum " + MAX_MEDIA_COUNT + " media items allowd");
+        if (mediaFiles.size() > MAX_MEDIA_COUNT) {
+            throw new BadRequestException("Maximum " + MAX_MEDIA_COUNT + " media items allowed");
         }
 
         Post post = new Post();
         post.setUserId(userId);
         post.setDescription(description);
-        post.setMediaCount(mediaUrls.size());
+        post.setMediaCount(mediaFiles.size());
         post.setIsActive(true);
 
         post = postRepository.save(post);
 
-        for (int i = 0; i < mediaUrls.size(); i++) {
+        for (int i = 0; i < mediaFiles.size(); i++) {
+            MultipartFile file = mediaFiles.get(i);
+            String storedFilename = fileStorageService.storeFile(file);
+            
             Media media = new Media();
             media.setPost(post);
-            media.setMediaUrl(mediaUrls.get(i));
-            media.setMediaType(determineMediaType(mediaUrls.get(i)));
+            media.setMediaUrl(storedFilename);
+            media.setMediaType(determineMediaType(file.getOriginalFilename()));
             media.setOrderIndex(i);
 
             mediaRepository.save(media);
@@ -54,7 +72,7 @@ public class PostService {
 
     public Post getPostById(Long postId) {
         return postRepository.findByIdAndIsActiveTrue(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
     }
 
 
@@ -75,7 +93,7 @@ public class PostService {
         Post post = getPostById(postId);
 
         if (!post.getUserId().equals(userId)) {
-            throw new RuntimeException("You can only update your own posts");
+            throw new UnauthorizedException("You can only update your own posts");
         }
 
         post.setDescription(newDescription);
@@ -89,13 +107,13 @@ public class PostService {
         Post post = getPostById(postId);
 
         if (!post.getUserId().equals(userId)) {
-            throw new RuntimeException("You can only modify your own posts");
+            throw new UnauthorizedException("You can only modify your own posts");
         }
         Media media = mediaRepository.findById(mediaId)
-                .orElseThrow(() -> new RuntimeException("Media not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Media not found"));
 
         if (!media.getPost().getId().equals(postId)) {
-            throw new RuntimeException("Media does not belong to this post");
+            throw new BadRequestException("Media does not belong to this post");
         }
 
         mediaRepository.delete(media);
@@ -114,7 +132,7 @@ public class PostService {
     public void deletePost(Long postId, Long userId) {
         Post post = getPostById(postId);
         if (!post.getUserId().equals(userId)) {
-            throw new RuntimeException("You can only delete your own posts");
+            throw new UnauthorizedException("You can only delete your own posts");
         }
 
         post.setIsActive(false);
@@ -126,7 +144,7 @@ public class PostService {
 
     private String determineMediaType(String url) {
         String lowerUrl = url.toLowerCase();
-        // SUPORTED MEDIA TYPES
+        // SUPPORTED MEDIA TYPES
         if (lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".jpeg") ||
                 lowerUrl.endsWith(".png") || lowerUrl.endsWith(".gif")) {
             return "IMAGE";
@@ -137,4 +155,16 @@ public class PostService {
         return "IMAGE";
     }
 
+    public void enrichPostWithCounts(Post post) {
+        // Fetch actual counts from Interaction Service
+        Long likeCount = interactionServiceClient.getLikeCount(post.getId());
+        Long commentCount = interactionServiceClient.getCommentCount(post.getId());
+        
+        post.setLikesCount(likeCount.intValue());
+        post.setCommentsCount(commentCount.intValue());
+    }
+
+    public UserServiceClient.UserResponse getUserDetails(Long userId) {
+        return userServiceClient.getUserDetails(userId);
+    }
 }
