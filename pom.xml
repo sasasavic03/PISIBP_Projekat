@@ -18,6 +18,7 @@
         <module>feed-service</module>
         <module>interaction-service</module>
         <module>api-gateway</module>
+        <module>ui-tests</module>
     </modules>
 
     <properties>

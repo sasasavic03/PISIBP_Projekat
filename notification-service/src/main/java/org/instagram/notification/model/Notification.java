@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="notification_db")
+@Table(name="notifications")
 public class Notification {
 
     @Id
@@ -14,7 +14,7 @@ public class Notification {
     private Long id;
 
     @Column(name = "recipient_id",nullable = false)
-    private Long RecipientId;
+    private Long recipientId;
 
     @Column(name = "sender_id",nullable = false)
     private Long senderId;
@@ -32,8 +32,8 @@ public class Notification {
     public Long getId() {return id;}
     public void setId(Long id) {this.id = id;}
 
-    public Long getRecipientId() {return RecipientId;}
-    public void setRecipientId(Long RecipientId) {this.RecipientId = RecipientId;}
+    public Long getRecipientId() {return recipientId;}
+    public void setRecipientId(Long recipientId) {this.recipientId = recipientId;}
 
     public Long getSenderId() {return senderId;}
     public void setSenderId(Long senderId) {this.senderId = senderId;}
