@@ -1,27 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./settings.css";
-
-const blockedMock = [
-  { id: 1, username: "john.doe",   avatar: "https://i.pravatar.cc/150?img=1" },
-  { id: 2, username: "jane.smith", avatar: "https://i.pravatar.cc/150?img=2" },
-  { id: 3, username: "mike.ross",  avatar: "https://i.pravatar.cc/150?img=3" },
-];
+import { updateUserSettings, updateAvatar, getBlockedUsers, unblockUser } from "../../api/userApi";
 
 export default function Settings() {
 
+  const loggedUserId = parseInt(localStorage.getItem("userId")) || 1;
+
   const [form, setForm] = useState({
-    avatar: "",
-    username: "john.doe",
-    fullName: "John Doe",
-    email: "john.doe@gmail.com",
-    bio: "📸 Photography enthusiast | 🌍 Traveler | ☕ Coffee addict",
+    username: localStorage.getItem("username") || "",
+    fullName: "",
+    email: "",
+    bio: "",
     password: "",
     confirmPassword: "",
   });
 
-  const [preview, setPreview] = useState("https://i.pravatar.cc/150?img=1");
+  const [preview, setPreview] = useState(localStorage.getItem("avatar") || "");
+  const [avatarFile, setAvatarFile] = useState(null);
   const [saved, setSaved] = useState(false);
-  const [blocked, setBlocked] = useState(blockedMock);
+  const [error, setError] = useState(null);
+  const [blocked, setBlocked] = useState([]);
+
+  useEffect(() => {
+    async function fetchBlocked() {
+      try {
+        const data = await getBlockedUsers(loggedUserId);
+        setBlocked(data);
+      } catch (err) {
+        console.error("Failed to fetch blocked users:", err);
+      }
+    }
+    fetchBlocked();
+  }, []);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,23 +39,64 @@ export default function Settings() {
 
   function handleAvatarChange(e) {
     const file = e.target.files[0];
-    if (file) setPreview(URL.createObjectURL(file));
+    if (file) {
+      setAvatarFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setError(null);
+
+    if (form.password && form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      
+      if (avatarFile) {
+        const avatarData = await updateAvatar(loggedUserId, avatarFile);
+        localStorage.setItem("avatar", avatarData.avatarUrl);
+      }
+
+      
+      const payload = {
+        username: form.username,
+        fullName: form.fullName,
+        email: form.email,
+        bio: form.bio,
+      };
+
+      if (form.password) {
+        payload.password = form.password;
+      }
+
+      await updateUserSettings(loggedUserId, payload);
+
+      localStorage.setItem("username", form.username);
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError("Failed to save changes.");
+      console.error("Settings update failed:", err);
+    }
   }
 
-  function unblock(id) {
-    setBlocked(blocked.filter(u => u.id !== id));
+  async function handleUnblock(userId) {
+    try {
+      await unblockUser(userId);
+      setBlocked(blocked.filter(u => u.id !== userId));
+    } catch (err) {
+      console.error("Failed to unblock:", err);
+    }
   }
 
   return (
     <div className="ig-settings-layout">
 
-      
       <div className="ig-settings">
 
         <div className="ig-settings-header">
@@ -67,54 +118,54 @@ export default function Settings() {
 
           <div className="ig-settings-divider" />
 
-<div className="ig-settings-grid">
+          <div className="ig-settings-grid">
 
-  <div className="ig-settings-row">
-    <label>Username</label>
-    <input type="text" name="username" value={form.username} onChange={handleChange} />
-  </div>
+            <div className="ig-settings-row">
+              <label>Username</label>
+              <input type="text" name="username" value={form.username} onChange={handleChange} />
+            </div>
 
-  <div className="ig-settings-row">
-    <label>Full name</label>
-    <input type="text" name="fullName" value={form.fullName} onChange={handleChange} />
-  </div>
+            <div className="ig-settings-row">
+              <label>Full name</label>
+              <input type="text" name="fullName" value={form.fullName} onChange={handleChange} />
+            </div>
 
-  <div className="ig-settings-divider" />
+            <div className="ig-settings-divider" />
 
-  <div className="ig-settings-row">
-    <label>Email</label>
-    <input type="email" name="email" value={form.email} onChange={handleChange} />
-  </div>
+            <div className="ig-settings-row">
+              <label>Email</label>
+              <input type="email" name="email" value={form.email} onChange={handleChange} />
+            </div>
 
-  <div className="ig-settings-row ig-settings-full">
-    <label>Bio</label>
-    <textarea name="bio" value={form.bio} onChange={handleChange} rows={3} maxLength={150} />
-    <span className="ig-settings-charcount">{form.bio.length}/150</span>
-  </div>
+            <div className="ig-settings-row ig-settings-full">
+              <label>Bio</label>
+              <textarea name="bio" value={form.bio} onChange={handleChange} rows={3} maxLength={150} />
+              <span className="ig-settings-charcount">{form.bio.length}/150</span>
+            </div>
 
-  <div className="ig-settings-divider" />
+            <div className="ig-settings-divider" />
 
-  <div className="ig-settings-row">
-    <label>New password</label>
-    <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Leave blank to keep current" />
-  </div>
+            <div className="ig-settings-row">
+              <label>New password</label>
+              <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Leave blank to keep current" />
+            </div>
 
-  <div className="ig-settings-row">
-    <label>Confirm password</label>
-    <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Repeat new password" />
-  </div>
+            <div className="ig-settings-row">
+              <label>Confirm password</label>
+              <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Repeat new password" />
+            </div>
 
-  <div className="ig-settings-footer">
-    {saved && <span className="ig-settings-saved">✓ Changes saved</span>}
-    <button type="submit" className="ig-settings-submit">Save changes</button>
-  </div>
+            <div className="ig-settings-footer">
+              {error && <span className="ig-settings-error">{error}</span>}
+              {saved && <span className="ig-settings-saved">✓ Changes saved</span>}
+              <button type="submit" className="ig-settings-submit">Save changes</button>
+            </div>
 
-</div>
+          </div>
 
-</form>
+        </form>
       </div>
 
-      
       <div className="ig-settings-blocked">
 
         <div className="ig-settings-header">
@@ -131,7 +182,7 @@ export default function Settings() {
                 <span className="ig-settings-blocked-username">{user.username}</span>
                 <button
                   className="ig-settings-unblock-btn"
-                  onClick={() => unblock(user.id)}
+                  onClick={() => handleUnblock(user.id)}
                 >
                   Unblock
                 </button>

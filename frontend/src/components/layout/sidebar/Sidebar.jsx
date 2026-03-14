@@ -1,6 +1,7 @@
 import React from "react";
-import { Link } from "react-router"
+import { Link } from "react-router-dom";
 import "./sidebar.css";
+import { useNavigate } from "react-router-dom";
 import {
   FiHome,
   FiSearch,
@@ -9,22 +10,32 @@ import {
   FiHeart,
   FiPlusSquare,
   FiUser,
+  FiLogOut
 } from "react-icons/fi";
 
 const navItems = [
-  { key: "home", label: "Home", icon: <FiHome />, href: "/home"},
-  { key: "search", label: "Search", icon: <FiSearch />, href: "/search" },
-  { key: "explore", label: "Explore", icon: <FiCompass />, href: "/explore" },
-  { key: "messages", label: "Messages", icon: <FiSend />, href: "/messages" },
-  { key: "notifications", label: "Notifications", icon: <FiHeart />, href: "/notifications" },
-  { key: "create", label: "Create", icon: <FiPlusSquare />, href: "/create" },
-  { key: "profile", label: "Profile", icon: <FiUser />, href: "/profiletest" },
+  { key: "home",          label: "Home",          icon: <FiHome />,       href: "/feed" },
+  { key: "search",        label: "Search",        icon: <FiSearch /> },
+  { key: "explore",       label: "Explore",       icon: <FiCompass />,    href: "/explore" },
+  { key: "messages",      label: "Messages",      icon: <FiSend />,       href: "/messages" },
+  { key: "notifications", label: "Notifications", icon: <FiHeart /> },
+  { key: "create",        label: "Create",        icon: <FiPlusSquare /> },
+  { key: "profile",       label: "Profile",       icon: <FiUser /> },
 ];
 
 export default function Sidebar({ activeKey = "home", onNavigate, showSearch, onSearchOpen, onSearchClose, onCreateOpen, showNotifications, onNotificationsOpen, onNotificationsClose, unreadCount }) {
-  
 
-  console.log("unreadCount:", unreadCount);
+  const navigate = useNavigate();
+
+  const loggedUsername = localStorage.getItem("username");
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("username");
+    localStorage.removeItem("avatar");
+    navigate("/login");
+  }
 
   const handleClick = (e, item) => {
     if (onNavigate) {
@@ -47,6 +58,7 @@ export default function Sidebar({ activeKey = "home", onNavigate, showSearch, on
             const isSearch = item.key === "search";
             const isCreate = item.key === "create";
             const isNotifications = item.key === "notifications";
+            const isProfile = item.key === "profile";
 
             if (isSearch) {
               return (
@@ -70,7 +82,9 @@ export default function Sidebar({ activeKey = "home", onNavigate, showSearch, on
                   className="ig-sidebar__link"
                   onClick={onCreateOpen}
                 >
-                  <span className="ig-sidebar__icon"><FiPlusSquare /></span>
+                  <span className="ig-sidebar__icon">
+                    <FiPlusSquare />
+                  </span>
                   <span className="ig-sidebar__label">Create</span>
                 </button>
               );
@@ -94,6 +108,20 @@ export default function Sidebar({ activeKey = "home", onNavigate, showSearch, on
               );
             }
 
+            if (isProfile) {
+              return (
+                <Link
+                  key={item.key}
+                  className={`ig-sidebar__link ${isActive ? "is-active" : ""}`}
+                  to={`/profile/${loggedUsername}`}
+                >
+                  <span className="ig-sidebar__icon">
+                    <FiUser />
+                  </span>
+                  <span className="ig-sidebar__label">Profile</span>
+                </Link>
+              );
+            }
 
             return (
               <Link
@@ -103,12 +131,21 @@ export default function Sidebar({ activeKey = "home", onNavigate, showSearch, on
                 onClick={(e) => handleClick(e, item)}
                 aria-current={isActive ? "page" : undefined}
               >
-                <span className="ig-sidebar__icon" aria-hidden="true"> {item.icon}</span>
+                <span className="ig-sidebar__icon" aria-hidden="true">
+                  {item.icon}
+                </span>
                 <span className="ig-sidebar__label">{item.label}</span>
               </Link>
             );
           })}
         </nav>
+
+        <div className="ig-sidebar__bottom">
+          <button className="ig-sidebar__link" onClick={handleLogout}>
+            <span className="ig-sidebar__icon"><FiLogOut /></span>
+            <span className="ig-sidebar__label">Log out</span>
+          </button>
+        </div>
 
       </div>
     </aside>

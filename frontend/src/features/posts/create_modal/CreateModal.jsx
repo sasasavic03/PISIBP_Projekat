@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import "./createmodal.css";
 import { FiX, FiChevronLeft, FiImage } from "react-icons/fi";
+import { createPost } from "../../api/postApi";
 
 const MAX_FILES = 20;
 const MAX_SIZE_MB = 50;
@@ -8,11 +9,13 @@ const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 export default function CreateModal({ onClose }) {
 
-  const [step, setStep] = useState(1); // 1: upload, 2: preview, 3: caption
+  const [step, setStep] = useState(1);
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState([]);
   const [caption, setCaption] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const inputRef = useRef(null);
 
@@ -47,7 +50,6 @@ export default function CreateModal({ onClose }) {
 
     setErrors(newErrors);
     setFiles(combined);
-
     if (combined.length > 0) setStep(2);
   }
 
@@ -67,33 +69,36 @@ export default function CreateModal({ onClose }) {
     if (updated.length === 0) setStep(1);
   }
 
-  function handleShare() {
-    // ovde ide api poziv npr POST /api/posts 
-    console.log("Sharing post:", { files, caption });
-    onClose();
+  async function handleShare() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await createPost(files, caption);
+      onClose();
+    } catch (err) {
+      setError("Failed to create post. Please try again.");
+      console.error("Create post failed:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="ig-create-backdrop" onClick={onClose}>
       <div className="ig-create-modal" onClick={e => e.stopPropagation()}>
 
-        
         <div className="ig-create-header">
           {step > 1 && (
-            <button
-              className="ig-create-back"
-              onClick={() => setStep(step - 1)}
-            >
+            <button className="ig-create-back" onClick={() => setStep(step - 1)}>
               <FiChevronLeft />
             </button>
           )}
-
           <span>
             {step === 1 && "Create new post"}
             {step === 2 && "Preview"}
             {step === 3 && "New post"}
           </span>
-
           <button className="ig-create-close" onClick={onClose}>
             <FiX />
           </button>
@@ -130,7 +135,7 @@ export default function CreateModal({ onClose }) {
           </div>
         )}
 
-        {/*preview */}
+        {/* preview */}
         {step === 2 && (
           <div className="ig-create-preview">
             <div className="ig-create-preview-grid">
@@ -141,20 +146,14 @@ export default function CreateModal({ onClose }) {
                   ) : (
                     <img src={f.preview} alt="" className="ig-create-preview-media" />
                   )}
-                  <button
-                    className="ig-create-preview-remove"
-                    onClick={() => removeFile(f.id)}
-                  >
+                  <button className="ig-create-preview-remove" onClick={() => removeFile(f.id)}>
                     <FiX />
                   </button>
                 </div>
               ))}
 
               {files.length < MAX_FILES && (
-                <div
-                  className="ig-create-preview-add"
-                  onClick={() => inputRef.current.click()}
-                >
+                <div className="ig-create-preview-add" onClick={() => inputRef.current.click()}>
                   <FiImage />
                   <span>Add more</span>
                   <input
@@ -179,10 +178,7 @@ export default function CreateModal({ onClose }) {
 
             <div className="ig-create-preview-footer">
               <span className="ig-create-count">{files.length}/{MAX_FILES} files</span>
-              <button
-                className="ig-create-next-btn"
-                onClick={() => setStep(3)}
-              >
+              <button className="ig-create-next-btn" onClick={() => setStep(3)}>
                 Next
               </button>
             </div>
@@ -214,8 +210,15 @@ export default function CreateModal({ onClose }) {
               <span className="ig-create-caption-charcount">
                 {caption.length}/2200
               </span>
-              <button className="ig-create-share-btn" onClick={handleShare}>
-                Share
+
+              {error && <p className="ig-create-error">{error}</p>}
+
+              <button
+                className="ig-create-share-btn"
+                onClick={handleShare}
+                disabled={loading}
+              >
+                {loading ? "Sharing..." : "Share"}
               </button>
             </div>
           </div>

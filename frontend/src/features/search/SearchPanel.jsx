@@ -1,33 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./searchpanel.css";
 import { FiSearch, FiX } from "react-icons/fi";
-import { profilesMock } from "../../data/profile.mock";
+import { searchUsers } from "../../api/searchApi";
 
 export default function SearchPanel({ onClose }) {
   const [query, setQuery] = useState("");
-/* radi sa mock podacima */
-  const results = query.trim() === ""
-    ? []
-    : profilesMock.filter(p =>
-        p.user.username.toLowerCase().includes(query.toLowerCase()) ||
-        p.user.fullName.toLowerCase().includes(query.toLowerCase())
-      );
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-/* sa backom */
-/* const [results, setResults] = useState([]);
+  useEffect(() => {
+    if (query.trim() === "") {
+      setResults([]);
+      return;
+    }
 
-useEffect(() => {
-  if (query.trim() === "") {
-    setResults([]);
-    return;
-  }
+    const timeout = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const data = await searchUsers(query);
+        setResults(data);
+      } catch (err) {
+        console.error("Search failed:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 400); 
 
-  fetch(`http://localhost:8080/api/users/search?q=${query}`)
-    .then(res => res.json())
-    .then(data => setResults(data));
-
-}, [query]); */
+    return () => clearTimeout(timeout);
+  }, [query]);
 
   return (
     <div className="ig-searchpanel">
@@ -57,20 +58,22 @@ useEffect(() => {
       <div className="ig-searchpanel-results">
         {query.trim() === "" ? (
           <p className="ig-searchpanel-hint">Try searching for people.</p>
+        ) : loading ? (
+          <p className="ig-searchpanel-hint">Searching...</p>
         ) : results.length === 0 ? (
           <p className="ig-searchpanel-hint">No results for "{query}".</p>
         ) : (
-          results.map((p) => (
+          results.map((user) => (
             <Link
-              key={p.user.id}
-              to={`/profile/${p.user.username}`}
+              key={user.id}
+              to={`/profile/${user.username}`}
               className="ig-searchpanel-item"
               onClick={onClose}
             >
-              <img src={p.user.avatar} alt={p.user.username} />
+              <img src={user.avatar} alt={user.username} />
               <div className="ig-searchpanel-item-info">
-                <span className="ig-searchpanel-username">{p.user.username}</span>
-                <span className="ig-searchpanel-fullname">{p.user.fullName}</span>
+                <span className="ig-searchpanel-username">{user.username}</span>
+                <span className="ig-searchpanel-fullname">{user.fullName}</span>
               </div>
             </Link>
           ))

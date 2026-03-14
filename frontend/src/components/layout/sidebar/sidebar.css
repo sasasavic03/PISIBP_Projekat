@@ -125,3 +125,7 @@
   height: 8px;
   border-radius: 50%;
 }
+
+.ig-sidebar__bottom {
+  margin-top: auto;
+}

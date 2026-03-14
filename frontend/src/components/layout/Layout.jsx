@@ -1,24 +1,36 @@
 import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./sidebar/Sidebar";
 import SearchPanel from "../../features/search/SearchPanel";
 import CreateModal from "../../features/posts/create_modal/CreateModal";
 import NotificationsPanel from "../../features/notifications/NotificationsPanel";
 import "./layout.css";
-import { notificationsMock } from "../../data/notifications.mock";
+import { getNotifications } from "../../api/notificationsApi";
 
 export default function Layout() {
 
   const [showSearch, setShowSearch] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
-  const [notifications, setNotifications] = useState(notificationsMock);
+  const userId = localStorage.getItem("userId");
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  return (
+  useEffect(() => {
+    async function fetchNotifications() {
+      try {
+        const data = await getNotifications(userId);
+        setNotifications(data);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    }
 
-    
+    if (userId) fetchNotifications();
+  }, [userId]);
+
+  return (
     <div className="layout">
       <aside className="layout-sidebar">
         <Sidebar
@@ -48,14 +60,10 @@ export default function Layout() {
           onClose={() => setShowNotifications(false)}
         />
       )}
-  
-      
 
       <main className="layout-main">
         <Outlet />
       </main>
     </div>
-
   );
 }
-

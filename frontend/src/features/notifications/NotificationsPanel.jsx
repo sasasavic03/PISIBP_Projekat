@@ -1,26 +1,40 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import "./notificationspanel.css";
+import { markAllRead, acceptFollowRequest, declineFollowRequest } from "../../api/notificationsApi";
 
+export default function NotificationsPanel({ notifications, setNotifications, onClose }) {
 
-export default function NotificationsPanel({notifications, setNotifications, onClose }) {
-
- 
-
-  function accept(id) {
-    setNotifications(notifications.map(n =>
-      n.id === id
-        ? { ...n, type: "follow_accepted_by_you", message: "You accepted their request.", read: true }
-        : n
-    ));
+  async function accept(id) {
+    try {
+      await acceptFollowRequest(id);
+      setNotifications(notifications.map(n =>
+        n.id === id
+          ? { ...n, type: "follow_accepted_by_you", message: "You accepted their request.", read: true }
+          : n
+      ));
+    } catch (err) {
+      console.error("Failed to accept follow request:", err);
+    }
   }
 
-  function decline(id) {
-    setNotifications(notifications.filter(n => n.id !== id));
+  async function decline(id) {
+    try {
+      await declineFollowRequest(id);
+      setNotifications(notifications.filter(n => n.id !== id));
+    } catch (err) {
+      console.error("Failed to decline follow request:", err);
+    }
   }
 
-  function markAllRead() {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  async function handleMarkAllRead() {
+    try {
+      const userId = localStorage.getItem("userId");
+      await markAllRead(userId);
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.error("Failed to mark all read:", err);
+    }
   }
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -31,7 +45,7 @@ export default function NotificationsPanel({notifications, setNotifications, onC
       <div className="ig-notif-header">
         <h2>Notifications</h2>
         {unreadCount > 0 && (
-          <button className="ig-notif-markread" onClick={markAllRead}>
+          <button className="ig-notif-markread" onClick={handleMarkAllRead}>
             Mark all as read
           </button>
         )}

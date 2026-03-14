@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import "./postmodal.css";
 import { FiHeart, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import LikedByModal from "../likedby_modal/LikeByModal";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
+import { likePost, unlikePost } from "../../../api/likeApi";
+import { addComment } from "../../../api/commentApi";
 
-export default function PostModal({ post, onClose,isOwner, onDeletePost, onDeleteImage  }) {
+export default function PostModal({ post, onClose, isOwner, onDeletePost, onDeleteImage }) {
 
   const [comments, setComments] = useState(post.comments);
   const [newComment, setNewComment] = useState("");
@@ -26,31 +28,56 @@ export default function PostModal({ post, onClose,isOwner, onDeletePost, onDelet
     setCurrentIndex((prev) => prev === 0 ? prev : prev - 1);
   }
 
-  function likePost() {
-    if (liked) {
-      setLikes(likes - 1);
-      setLiked(false);
-      setLikedBy(likedBy.filter(u => u.username !== "you"));
-    } else {
-      setLikes(likes + 1);
-      setLiked(true);
-      setLikedBy([{ id: 0, username: "you", avatar: "https://i.pravatar.cc/150?img=10" }, ...likedBy]);
+  async function likePostHandler() {
+    try {
+      if (liked) {
+        const data = await unlikePost(post.id);
+        setLikes(data.likesCount);
+        setLiked(false);
+        setLikedBy(likedBy.filter(u => u.username !== localStorage.getItem("username")));
+      } else {
+        const data = await likePost(post.id);
+        setLikes(data.likesCount);
+        setLiked(true);
+        setLikedBy([{
+          id: 0,
+          username: localStorage.getItem("username"),
+          avatar: localStorage.getItem("avatar")
+        }, ...likedBy]);
+      }
+    } catch (err) {
+      console.error("Failed to toggle like:", err);
     }
   }
-  function doubleClickLike() {
+
+  async function doubleClickLike() {
     if (!liked) {
-      setLikes(likes + 1);
-      setLiked(true);
+      try {
+        const data = await likePost(post.id);
+        setLikes(data.likesCount);
+        setLiked(true);
+        setLikedBy([{
+          id: 0,
+          username: localStorage.getItem("username"),
+          avatar: localStorage.getItem("avatar")
+        }, ...likedBy]);
+      } catch (err) {
+        console.error("Failed to like:", err);
+      }
     }
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 700);
   }
 
-  function addComment() {
+  async function handleAddComment() {
     if (!newComment.trim()) return;
-    const comment = { id: Date.now(), username: "you", text: newComment };
-    setComments([...comments, comment]);
-    setNewComment("");
+    try {
+      const data = await addComment(post.id, newComment);
+      setComments([...comments, data]);
+      setNewComment("");
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    }
   }
 
   return (
@@ -94,7 +121,6 @@ export default function PostModal({ post, onClose,isOwner, onDeletePost, onDelet
 
           <div className="ig-modal-header">
             <strong>{post.username}</strong>
-
             {isOwner && (
               <button className="ig-modal-options-btn" onClick={() => setShowOptions(true)}>
                 ···
@@ -122,34 +148,36 @@ export default function PostModal({ post, onClose,isOwner, onDeletePost, onDelet
                 </div>
               </div>
             )}
-            
+
             {comments.map((c) => (
               <div key={c.id} className="ig-comment">
                 <Link to={`/profile/${c.username}`} onClick={(e) => e.stopPropagation()}>
-                    <img src={c.avatar} alt={c.username} className="ig-comment-avatar" />
+                  <img src={c.avatar} alt={c.username} className="ig-comment-avatar" />
                 </Link>
-                
-
-              <div className="ig-comment-body">
-                <strong><Link 
-                              to={`/profile/${c.username}`}
-                              onClick={(e) => e.stopPropagation()} className="ig-comment_profile" >
-                              {c.username}
-                        </Link>
-                  </strong> {c.text}
-              </div>
-                
+                <div className="ig-comment-body">
+                  <strong>
+                    <Link
+                      to={`/profile/${c.username}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="ig-comment_profile"
+                    >
+                      {c.username}
+                    </Link>
+                  </strong>{" "}
+                  {c.text}
+                </div>
               </div>
             ))}
+
           </div>
 
           <div className="ig-modal-actions">
-              <button onClick={likePost}>
-                {liked
-                  ? <FiHeart stroke="black" fill="red" />
-                  : <FiHeart stroke="black" />
-                } {likes}
-              </button>
+            <button onClick={likePostHandler}>
+              {liked
+                ? <FiHeart stroke="black" fill="red" />
+                : <FiHeart stroke="black" />
+              } {likes}
+            </button>
           </div>
 
           {likedBy.length > 0 && (
@@ -189,54 +217,53 @@ export default function PostModal({ post, onClose,isOwner, onDeletePost, onDelet
               placeholder="Add a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addComment()}
+              onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
             />
-            <button onClick={addComment}>Post</button>
+            <button onClick={handleAddComment}>Post</button>
           </div>
 
         </div>
 
-
-
       </div>
 
       {showOptions && (
-          <div className="ig-post_options_backdrop" onClick={() => setShowOptions(false)}>
-            <div className="ig-post_options_panel" onClick={e => e.stopPropagation()}>
+        <div className="ig-post_options_backdrop" onClick={() => setShowOptions(false)}>
+          <div className="ig-post_options_panel" onClick={e => e.stopPropagation()}>
 
-              <button
-                className="ig-post_options_item ig-post_options_danger"
-                onClick={() => onDeletePost(post.id)}
-              >
-                Delete post
-              </button>
-              <div className="ig-post_options_divider" />
+            <button
+              className="ig-post_options_item ig-post_options_danger"
+              onClick={() => onDeletePost(post.id)}
+            >
+              Delete post
+            </button>
+            <div className="ig-post_options_divider" />
 
-              {images.length > 1 && (
-                <>
-                  <button
-                    className="ig-post_options_item ig-post_options_danger"
-                    onClick={() => {
-                      onDeleteImage(post.id, currentIndex);
-                      setShowOptions(false);
-                    }}
-                  >
-                    Delete current photo
-                  </button>
-                  <div className="ig-post_options_divider" />
-                </>
-              )}
+            {images.length > 1 && (
+              <>
+                <button
+                  className="ig-post_options_item ig-post_options_danger"
+                  onClick={() => {
+                    onDeleteImage(post.id, currentIndex);
+                    setShowOptions(false);
+                  }}
+                >
+                  Delete current photo
+                </button>
+                <div className="ig-post_options_divider" />
+              </>
+            )}
 
-              <button
-                className="ig-post_options_item"
-                onClick={() => setShowOptions(false)}
-              >
-                Cancel
-              </button>
+            <button
+              className="ig-post_options_item"
+              onClick={() => setShowOptions(false)}
+            >
+              Cancel
+            </button>
 
-            </div>
           </div>
-        )}
+        </div>
+      )}
+
     </div>
   );
 }
