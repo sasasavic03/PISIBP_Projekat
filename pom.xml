@@ -14,8 +14,10 @@
         <module>follow-service</module>
         <module>post-service</module>
         <module>block-service</module>
-        <module>block-service</module>
         <module>notification-service</module>
+        <module>feed-service</module>
+        <module>interaction-service</module>
+        <module>api-gateway</module>
     </modules>
 
     <properties>
