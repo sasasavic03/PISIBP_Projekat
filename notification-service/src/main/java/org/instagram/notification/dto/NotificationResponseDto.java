@@ -53,7 +53,7 @@ public class NotificationResponseDto {
     public String getAvatar(){return avatar;}
     public void setAvatar(String avatar){this.avatar = avatar;}
     public String getMessage(){return message;}
-    public String getTime(){ return message;}
+    public String getTime(){ return time;}
     public boolean isRead(){return read;}
 
 
