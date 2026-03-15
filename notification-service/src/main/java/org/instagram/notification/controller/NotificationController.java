@@ -8,9 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/notification")
+@RequestMapping("/api/notification")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -25,20 +26,27 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{recipientId}")
-    public ResponseEntity<List<NotificationResponseDto>> getNotifications(@PathVariable Long recipientId){
-        return ResponseEntity.ok(notificationService.getNotifications(recipientId));
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<NotificationResponseDto>> getNotifications(@PathVariable Long userId){
+        return ResponseEntity.ok(notificationService.getNotifications(userId));
     }
 
-    @GetMapping("/{recipientId}/unread")
-    public ResponseEntity<List<NotificationResponseDto>> getUnreadNotifications(@PathVariable Long recipientId){
-        return ResponseEntity.ok(notificationService.getUnreadNotifications(recipientId));
+    @PutMapping("/{userId}/read-all")
+    public ResponseEntity<Map<String,String>> markAllAsRead(@PathVariable Long userId){
+        notificationService.markAllAsRead(userId);
+        return ResponseEntity.ok(Map.of("message", "All notifications marked as read"));
     }
 
-    @PatchMapping("/{notificationId}/read")
-    public ResponseEntity<Void> markasRead(@PathVariable Long notificationId){
-        notificationService.markAsRead(notificationId);
-        return ResponseEntity.ok().build();
+    @PostMapping("/follow-request/{notificationId}/accept")
+    public ResponseEntity<Map<String, String>> acceptFollowRequest(@PathVariable Long notificationId){
+        notificationService.acceptFollowRequest(notificationId);
+        return ResponseEntity.ok(Map.of("message", "Follow request accepted"));
+    }
+
+    @DeleteMapping("/follow-request/{notificationId}/decline")
+    public ResponseEntity<Map<String, String>> declineFollowRequest(@PathVariable Long notificationId){
+        notificationService.declineFollowRequest(notificationId);
+        return ResponseEntity.ok(Map.of("message", "Follow request declined"));
     }
 
 }

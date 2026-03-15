@@ -28,14 +28,13 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public List<NotificationResponseDto> getNotifications(Long recipientId) {
+    public List<NotificationResponseDto> getNotifications(Long recipientId){
         return notificationRepository.findByRecipientIdOrderByCreatedAtDesc(recipientId)
                 .stream()
                 .map(n -> new NotificationResponseDto(
                         n.getId(),
-                        n.getRecipientId(),
-                        n.getSenderId(),
                         n.getType(),
+                        n.getSenderId(),
                         n.getIsRead(),
                         n.getCreatedAt()
                 ))
@@ -47,20 +46,37 @@ public class NotificationService {
                 .stream()
                 .map(n -> new NotificationResponseDto(
                         n.getId(),
-                        n.getRecipientId(),
-                        n.getSenderId(),
                         n.getType(),
+                        n.getSenderId(),
                         n.getIsRead(),
                         n.getCreatedAt()
                 ))
                 .toList();
     }
-
     public void markAsRead(Long notificationId){
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() ->new  RuntimeException("Notification not found"));
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
         notification.setRead(true);
         notificationRepository.save(notification);
+    }
+
+    public void markAllAsRead(Long recipientId) {
+        List<Notification> notifications = notificationRepository.findByRecipientIdOrderByCreatedAtDesc(recipientId);
+        notifications.forEach(n -> n.setRead(true));
+        notificationRepository.saveAll(notifications);
+    }
+
+    public void acceptFollowRequest(Long notificationId){
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+        notification.setRead(true);
+        notificationRepository.save(notification);
+    }
+
+    public void declineFollowRequest(Long notificationId){
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+        notificationRepository.delete(notification);
     }
 
 }

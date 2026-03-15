@@ -65,7 +65,7 @@ public class NotificationServiceTest {
         List<NotificationResponseDto> result = notificationService.getNotifications(2L);
 
         assertEquals(1,result.size());
-        assertEquals(2L, result.get(0).getRecipientId().longValue());
+        assertEquals(1L, result.get(0).getSenderId().longValue());
     }
 
     @Test

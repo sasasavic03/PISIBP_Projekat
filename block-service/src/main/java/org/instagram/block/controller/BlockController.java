@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/block")
+@RequestMapping("/api/users")
 public class BlockController {
 
     private final BlockService blockService;
@@ -18,26 +18,29 @@ public class BlockController {
         this.blockService = blockService;
     }
 
-    @PostMapping
-    public ResponseEntity<Void> block(@RequestBody BlockRequestDto request) {
-        blockService.block(request.getBlockerId(), request.getBlockedId());
+    @PostMapping("/{userId}/block")
+    public ResponseEntity<Void> block(@PathVariable Long userId,
+                                      @RequestBody BlockRequestDto request){
+        blockService.block(userId, request.getBlockedId());
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> unblock(@RequestBody BlockRequestDto request) {
-        blockService.unblock(request.getBlockerId(), request.getBlockedId());
+    @DeleteMapping("/{userId}/block")
+    public ResponseEntity<Void> unblock(@PathVariable Long userId,
+                                        @RequestBody BlockRequestDto request){
+        blockService.unblock(userId, request.getBlockedId());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{userId}/blocked")
+    public ResponseEntity<List<BlockResponseDto>> getBlockedUsers(@PathVariable Long userId){
+        return ResponseEntity.ok(blockService.getBlockedUsers(userId));
     }
 
     @GetMapping("/check")
     public ResponseEntity<Boolean> isBlocked(@RequestParam Long blockerId,
-                                             @RequestParam Long blockedId) {
+                                             @RequestParam Long blockedId){
         return ResponseEntity.ok(blockService.isBlocked(blockerId, blockedId));
     }
 
-    @GetMapping("/{blockerId}")
-    public ResponseEntity<List<BlockResponseDto>> getBlockedUsers(@PathVariable Long blockerId) {
-        return ResponseEntity.ok(blockService.getBlockedUsers(blockerId));
-    }
 }

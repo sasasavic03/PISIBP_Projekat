@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/follow")
+@RequestMapping("/api/follow")
 public class FollowController {
 
     private final FollowService service;
@@ -19,14 +19,17 @@ public class FollowController {
         this.service= service;
     }
 
-    @PostMapping
-    public ResponseEntity<Void> follow(@RequestBody FollowRequestDto request){
-        service.follow(request.getFollowerId(),request.getFollowingId(),request.isPrivate());
+    @PostMapping("/{targetUserId}")
+    public ResponseEntity<Void> follow(@PathVariable Long targetUserId,
+                                       @RequestBody FollowRequestDto request){
+        service.follow(request.getFollowerId(),targetUserId, request.isPrivate());
         return ResponseEntity.ok().build();
     }
-    @DeleteMapping
-    public ResponseEntity<Void> unfollow(@RequestBody FollowRequestDto request){
-        service.unfollow(request.getFollowerId(),request.getFollowingId());
+
+    @DeleteMapping("/{targetUserId}")
+    public ResponseEntity<Void> unfollow(@PathVariable Long targetUserId,
+                                         @RequestBody FollowRequestDto request){
+        service.unfollow(request.getFollowerId(),targetUserId);
         return ResponseEntity.ok().build();
     }
 
