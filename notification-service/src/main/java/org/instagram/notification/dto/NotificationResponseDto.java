@@ -5,7 +5,6 @@ import org.instagram.notification.model.NotificationType;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import static org.apache.catalina.manager.StatusTransformer.formatTime;
 
 public class NotificationResponseDto {
 
