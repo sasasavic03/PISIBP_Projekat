@@ -20,7 +20,7 @@ services:
     build: ./auth-service
     container_name: auth-service
     ports:
-      - "8081:8081"
+      - "8081:8080"
     depends_on:
       - postgres
     environment:
@@ -34,7 +34,7 @@ services:
     build: ./user-service
     container_name: user-service
     ports:
-      - "8082:8082"
+      - "8082:8080"
     depends_on:
       - postgres
     environment:
@@ -48,7 +48,21 @@ services:
     build: ./post-service
     container_name: post-service
     ports:
-      - "8082:8080"
+      - "8083:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/instagram
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - instagram-network
+
+  feed-service:
+    build: ./feed-service
+    container_name: feed-service
+    ports:
+      - "8084:8080"
     depends_on:
       - postgres
     environment:
@@ -62,7 +76,7 @@ services:
     build: ./follow-service
     container_name: follow-service
     ports:
-      - "8083:8080"
+      - "8085:8080"
     depends_on:
       - postgres
     environment:
@@ -76,7 +90,21 @@ services:
     build: ./interaction-service
     container_name: interaction-service
     ports:
-      - "8084:8080"
+      - "8086:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/instagram
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - instagram-network
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8087:8080"
     depends_on:
       - postgres
     environment:
@@ -90,7 +118,7 @@ services:
     build: ./block-service
     container_name: block-service
     ports:
-      - "8085:8080"
+      - "8088:8080"
     depends_on:
       - postgres
     environment:
