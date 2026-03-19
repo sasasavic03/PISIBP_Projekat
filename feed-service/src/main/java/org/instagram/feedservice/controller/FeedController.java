@@ -26,10 +26,62 @@ public class FeedController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserFeed(@PathVariable Long userId) {
+    @GetMapping("/user/{username}")
+    public ResponseEntity<?> getUserFeed(
+            @PathVariable String username,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         try {
-            List<FeedPostDTO> feed = feedService.getUserFeed(userId);
+            // Validate pagination parameters
+            if (page < 0) page = 0;
+            if (size <= 0) size = 10;
+            if (size > 100) size = 100; // Max page size limit
+
+            Map<String, Object> feedData = feedService.getUserFeedPaginatedByUsername(username, page, size);
+            return ResponseEntity.ok(feedData);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @GetMapping("/user/{username}/all")
+    public ResponseEntity<?> getUserFeedComplete(@PathVariable String username) {
+        try {
+            List<FeedPostDTO> feed = feedService.getUserFeedByUsername(username);
+            return ResponseEntity.ok(feed);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserProfileFeed(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            // Validate pagination parameters
+            if (page < 0) page = 0;
+            if (size <= 0) size = 10;
+            if (size > 100) size = 100; // Max page size limit
+
+            Map<String, Object> feedData = feedService.getUserProfileFeedPaginated(userId, page, size);
+            return ResponseEntity.ok(feedData);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @GetMapping("/{userId}/all")
+    public ResponseEntity<?> getUserProfileFeedComplete(@PathVariable Long userId) {
+        try {
+            List<FeedPostDTO> feed = feedService.getUserProfileFeed(userId);
             return ResponseEntity.ok(feed);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
