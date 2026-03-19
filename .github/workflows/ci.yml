@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, devops/** ]
+    branches: [ main, feature/** ]
   pull_request:
     branches: [ main ]
 
@@ -14,10 +14,14 @@ jobs:
       matrix:
         service:
           - auth-service
-          - post-service
+          - block-service
+          - feed-service
           - follow-service
           - interaction-service
-          - block-service
+          - notification-service
+          - post-service
+          - user-service
+          
 
     steps:
       - name: Checkout repository
