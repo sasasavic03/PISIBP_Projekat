@@ -36,6 +36,31 @@ services:
       timeout: 20s
       retries: 3
 
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - user-service
+      - post-service
+      - feed-service
+      - follow-service
+      - interaction-service
+      - notification-service
+      - block-service
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
+    networks:
+      - instagram-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   auth-service:
     build: ./auth-service
     container_name: auth-service
