@@ -3,6 +3,7 @@ package org.instagram.postservice.service;
 import jakarta.transaction.Transactional;
 import org.instagram.postservice.client.InteractionServiceClient;
 import org.instagram.postservice.client.UserServiceClient;
+import org.instagram.postservice.dto.PostUpdateDTO;
 import org.instagram.postservice.entity.Media;
 import org.instagram.postservice.entity.Post;
 import org.instagram.postservice.exception.BadRequestException;
@@ -100,6 +101,52 @@ public class PostService {
         return postRepository.save(post);
     }
 
+    @Transactional
+    public Post updatePost(Long postId, Long userId, PostUpdateDTO updateDTO) {
+        Post post = getPostById(postId);
+
+        if (!post.getUserId().equals(userId)) {
+            throw new UnauthorizedException("You can only update your own posts");
+        }
+
+        // Update description if provided
+        if (updateDTO.getDescription() != null) {
+            post.setDescription(updateDTO.getDescription());
+        }
+
+        // Update active status if provided
+        if (updateDTO.getIsActive() != null) {
+            post.setIsActive(updateDTO.getIsActive());
+        }
+
+        // Remove media if specified
+        if (updateDTO.getMediaIdsToRemove() != null && !updateDTO.getMediaIdsToRemove().isEmpty()) {
+            for (Long mediaId : updateDTO.getMediaIdsToRemove()) {
+                Media media = mediaRepository.findById(mediaId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Media not found with ID: " + mediaId));
+
+                if (!media.getPost().getId().equals(postId)) {
+                    throw new BadRequestException("Media does not belong to this post");
+                }
+
+                // Delete file from storage
+                fileStorageService.deleteFile(media.getMediaUrl());
+                mediaRepository.delete(media);
+            }
+
+            // Update media count
+            Long newCount = mediaRepository.countByPostId(postId);
+            post.setMediaCount(newCount.intValue());
+
+            // If no media left, deactivate post
+            if (newCount == 0) {
+                post.setIsActive(false);
+            }
+        }
+
+        return postRepository.save(post);
+    }
+
 
 
     @Transactional
@@ -127,12 +174,46 @@ public class PostService {
         return postRepository.save(post);
     }
 
+    @Transactional
+    public Post removeMediaByIndex(Long postId, Long userId, Integer mediaIndex) {
+        Post post = getPostById(postId);
+
+        if (!post.getUserId().equals(userId)) {
+            throw new UnauthorizedException("You can only modify your own posts");
+        }
+
+        // Get media by index
+        Media media = mediaRepository.findByPostIdAndOrderIndex(postId, mediaIndex)
+                .orElseThrow(() -> new ResourceNotFoundException("Media not found at index: " + mediaIndex));
+
+        // Delete file from storage
+        fileStorageService.deleteFile(media.getMediaUrl());
+        mediaRepository.delete(media);
+
+        // Update media count
+        Long newCount = mediaRepository.countByPostId(postId);
+        post.setMediaCount(newCount.intValue());
+
+        // If no media left, deactivate post
+        if (newCount == 0) {
+            post.setIsActive(false);
+        }
+
+        return postRepository.save(post);
+    }
+
 
     @Transactional
     public void deletePost(Long postId, Long userId) {
         Post post = getPostById(postId);
         if (!post.getUserId().equals(userId)) {
             throw new UnauthorizedException("You can only delete your own posts");
+        }
+
+        // Delete all media files associated with the post
+        List<Media> mediaList = mediaRepository.findByPostIdOrderByOrderIndexAsc(postId);
+        for (Media media : mediaList) {
+            fileStorageService.deleteFile(media.getMediaUrl());
         }
 
         post.setIsActive(false);

@@ -1,12 +1,14 @@
 package org.instagram.postservice.controller;
 
 import org.instagram.postservice.client.UserServiceClient;
+import org.instagram.postservice.dto.PostUpdateDTO;
 import org.instagram.postservice.dto.PostWithUserDTO;
 import org.instagram.postservice.entity.Post;
 import org.instagram.postservice.service.FileStorageService;
 import org.instagram.postservice.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -119,10 +121,34 @@ public class PostController {
             String description = (String) request.get("description");
 
             Post post = postService.updateDescription(id, userId, description);
-            return ResponseEntity.ok(post);
-
+            postService.enrichPostWithCounts(post);
+            
+            PostWithUserDTO response = buildPostWithUserDTO(post);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updatePost(
+            @PathVariable Long id,
+            @RequestBody PostUpdateDTO updateDTO) {
+        try {
+            Long userId = updateDTO.getUserId();
+            if (userId == null) {
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("User ID must be provided in request body"));
+            }
+
+            Post post = postService.updatePost(id, userId, updateDTO);
+            postService.enrichPostWithCounts(post);
+            
+            PostWithUserDTO response = buildPostWithUserDTO(post);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
         }
     }
 
@@ -135,6 +161,19 @@ public class PostController {
             @RequestParam Long userId) {
         try {
             Post post = postService.removeMedia(postId, userId, mediaId);
+            return ResponseEntity.ok(post);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{postId}/media/index/{mediaIndex}")
+    public ResponseEntity<?> removeMediaByIndex(
+            @PathVariable Long postId,
+            @PathVariable Integer mediaIndex,
+            @RequestParam Long userId) {
+        try {
+            Post post = postService.removeMediaByIndex(postId, userId, mediaIndex);
             return ResponseEntity.ok(post);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
@@ -159,12 +198,60 @@ public class PostController {
     @GetMapping("/media/{filename}")
     public ResponseEntity<?> getMedia(@PathVariable String filename) {
         try {
+            // Validate filename to prevent directory traversal attacks
+            if (filename.contains("..") || filename.contains("/")) {
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("Invalid filename"));
+            }
+
+            if (!fileStorageService.fileExists(filename)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createErrorResponse("Media file not found"));
+            }
+
             byte[] fileContent = fileStorageService.getFile(filename);
+            String contentType = fileStorageService.getContentType(filename);
+            long fileSize = fileStorageService.getFileSize(filename);
+
             return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentLength(fileSize)
+                    .header("Content-Disposition", "inline; filename=\"" + filename + "\"")
                     .body(fileContent);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{postId}/media/{mediaId}")
+    public ResponseEntity<?> getMediaByPostAndMediaId(
+            @PathVariable Long postId,
+            @PathVariable Long mediaId) {
+        try {
+            Post post = postService.getPostById(postId);
+            org.instagram.postservice.entity.Media media = post.getMediaList().stream()
+                    .filter(m -> m.getId().equals(mediaId))
+                    .findFirst()
+                    .orElseThrow(() -> new Exception("Media not found in post"));
+
+            if (!fileStorageService.fileExists(media.getMediaUrl())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createErrorResponse("Media file not found"));
+            }
+
+            byte[] fileContent = fileStorageService.getFile(media.getMediaUrl());
+            String contentType = fileStorageService.getContentType(media.getMediaUrl());
+            long fileSize = fileStorageService.getFileSize(media.getMediaUrl());
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentLength(fileSize)
+                    .header("Content-Disposition", "inline; filename=\"" + media.getMediaUrl() + "\"")
+                    .body(fileContent);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse(e.getMessage()));
         }
     }
 
