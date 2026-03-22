@@ -20,6 +20,14 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<Map<String,String>> health(){
+        return ResponseEntity.ok(Map.of(
+                "status", "UP",
+                "service", "notification-service"
+        ));
+    }
+
     @PostMapping
     public ResponseEntity<Void> createNotification(@RequestBody NotificationRequestDto request){
         notificationService.createNotification(request);

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/follow")
@@ -17,6 +18,14 @@ public class FollowController {
 
     public FollowController(FollowService service){
         this.service= service;
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String,String>> health(){
+        return ResponseEntity.ok(Map.of(
+                "status","UP",
+                "service","follow-service"
+        ));
     }
 
     @PostMapping("/{targetUserId}")

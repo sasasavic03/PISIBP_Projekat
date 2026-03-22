@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -16,6 +17,14 @@ public class BlockController {
 
     public BlockController(BlockService blockService) {
         this.blockService = blockService;
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String,String>> health(){
+        return ResponseEntity.ok(Map.of(
+                "status","UP",
+                "service","block-service"
+        ));
     }
 
     @PostMapping("/{userId}/block")
