@@ -2,8 +2,8 @@ package org.instagram.auth.controller;
 
 import org.instagram.auth.dto.*;
 import org.instagram.auth.service.AuthService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,11 +16,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-
-        authService.register(request);
-
-        return ResponseEntity.ok("User registered successfully");
+    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
+        return authService.register(request);
     }
 
     @PostMapping("/login")

@@ -1,11 +1,10 @@
 package org.instagram.user_service.dto;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class UserResponse {
 
-    private UUID id;
+    private Long id;
     private String username;
     private String email;
     private String bio;
@@ -13,7 +12,7 @@ public class UserResponse {
     private boolean isPrivate;
     private LocalDateTime createdAt;
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
@@ -41,7 +40,7 @@ public class UserResponse {
         return createdAt;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

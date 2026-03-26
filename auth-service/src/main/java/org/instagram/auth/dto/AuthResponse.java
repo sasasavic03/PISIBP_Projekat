@@ -3,12 +3,48 @@ package org.instagram.auth.dto;
 public class AuthResponse {
 
     private String token;
+    private Long userId;
+    private String username;
+    private String avatar;
 
-    public AuthResponse(String token) {
+    public AuthResponse() {}
+
+    public AuthResponse(String token, Long userId, String username, String avatar) {
         this.token = token;
+        this.userId = userId;
+        this.username = username;
+        this.avatar = avatar;
     }
 
     public String getToken() {
         return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }

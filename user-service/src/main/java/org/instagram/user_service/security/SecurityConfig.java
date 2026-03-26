@@ -1,4 +1,4 @@
-package org.instagram.user_service.config;
+package org.instagram.user_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,9 +12,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                .requestMatchers("/users/search").permitAll()
+                .requestMatchers("/users/username/**").permitAll()
+                .requestMatchers("/users/**").permitAll()
+                .requestMatchers("/users").permitAll()
+                .anyRequest().authenticated()
             );
 
         return http.build();
