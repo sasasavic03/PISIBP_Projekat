@@ -36,6 +36,16 @@ services:
       timeout: 20s
       retries: 3
 
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - instagram-network
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
