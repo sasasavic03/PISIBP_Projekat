@@ -37,7 +37,7 @@ public class GatewayController {
         routes.put("users", "/api/users/**");
         routes.put("posts", "/api/posts/**");
         routes.put("follows", "/api/follows/**");
-        routes.put("interactions", "/api/interactions/**");
+        routes.put("interactions", "/api/likes/** and /api/comments/**");
         routes.put("blocks", "/api/blocks/**");
         routes.put("feeds", "/api/feeds/**");
         routes.put("notifications", "/api/notifications/**");
