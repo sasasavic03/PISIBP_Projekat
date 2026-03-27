@@ -29,17 +29,17 @@ public class FollowController {
     }
 
     @PostMapping("/{targetUserId}")
-    public ResponseEntity<Void> follow(@PathVariable Long targetUserId,
+    public ResponseEntity<Map<String, String>> follow(@PathVariable Long targetUserId,
                                        @RequestBody FollowRequestDto request){
         service.follow(request.getFollowerId(),targetUserId, request.isPrivate());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "Successfully followed user"));
     }
 
     @DeleteMapping("/{targetUserId}")
-    public ResponseEntity<Void> unfollow(@PathVariable Long targetUserId,
+    public ResponseEntity<Map<String, String>> unfollow(@PathVariable Long targetUserId,
                                          @RequestBody FollowRequestDto request){
         service.unfollow(request.getFollowerId(),targetUserId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "Successfully unfollowed user"));
     }
 
     @GetMapping("/{userId}/followers")

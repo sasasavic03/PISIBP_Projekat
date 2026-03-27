@@ -28,17 +28,17 @@ public class BlockController {
     }
 
     @PostMapping("/{userId}/block")
-    public ResponseEntity<Void> block(@PathVariable Long userId,
+    public ResponseEntity<Map<String, String>> block(@PathVariable Long userId,
                                       @RequestBody BlockRequestDto request){
         blockService.block(userId, request.getBlockedId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "User blocked successfully"));
     }
 
     @DeleteMapping("/{userId}/block")
-    public ResponseEntity<Void> unblock(@PathVariable Long userId,
+    public ResponseEntity<Map<String, String>> unblock(@PathVariable Long userId,
                                         @RequestBody BlockRequestDto request){
         blockService.unblock(userId, request.getBlockedId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "User unblocked successfully"));
     }
 
     @GetMapping("/{userId}/blocked")
