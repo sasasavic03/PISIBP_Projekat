@@ -7,7 +7,6 @@ import org.instagram.interactionservice.exception.ResourceNotFoundException;
 import org.instagram.interactionservice.repository.LikeRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +17,6 @@ public class LikeService {
     @Autowired
     private LikeRepository likeRepository;
 
-    @Value("${post.service.url}")
-    private String postServiceUrl;
-
 
     @Transactional
     public Like likePost(Long userId, Long postId) {
@@ -28,16 +24,11 @@ public class LikeService {
             throw new BadRequestException("You already liked this post");
         }
 
-
         Like like = new Like();
         like.setUserId(userId);
         like.setPostId(postId);
 
-        Like savedLike = likeRepository.save(like);
-
-        updatePostLikeCount(postId);
-
-        return savedLike;
+        return likeRepository.save(like);
     }
 
     @Transactional
@@ -46,19 +37,6 @@ public class LikeService {
                 .orElseThrow(() -> new ResourceNotFoundException("You haven't liked this post"));
 
         likeRepository.delete(like);
-
-        updatePostLikeCount(postId);
-    }
-
-    private void updatePostLikeCount(Long postId) {
-        try {
-            Long likeCount = likeRepository.countByPostId(postId);
-            System.out.println("Post " + postId + " now has " + likeCount + " likes");
-        }
-
-        catch (Exception e) {
-            System.err.println("Failed to update post like count: " + e.getMessage());
-        }
     }
 
 

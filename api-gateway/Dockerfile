@@ -7,7 +7,7 @@ COPY . .
 # Build the Spring Boot jar
 RUN mvn -B -DskipTests package
 
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 

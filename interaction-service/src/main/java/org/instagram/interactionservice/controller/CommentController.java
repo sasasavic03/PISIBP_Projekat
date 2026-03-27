@@ -45,7 +45,16 @@ public class CommentController {
         );
 
         CommentResponseDto response = mapToDto(comment);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        
+        // Get updated comment count
+        Long commentCount = commentService.getCommentCount(request.getPostId());
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "Comment added successfully");
+        result.put("comment", response);
+        result.put("commentsCount", commentCount);  // Include updated count
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping("/post/{postId}")
@@ -111,12 +120,6 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-
-    private Map<String, String> createErrorResponse(String message) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", message);
-        return error;
-    }
 
     private CommentResponseDto mapToDto(Comment comment) {
         return new CommentResponseDto(

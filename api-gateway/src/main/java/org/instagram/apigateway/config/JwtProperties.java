@@ -2,11 +2,16 @@ package org.instagram.apigateway.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
+    
+    private static final Logger logger = LoggerFactory.getLogger(JwtProperties.class);
 
     private String secret;
     private long expiration = 86400000; // 24 hours default
@@ -55,6 +60,11 @@ public class JwtProperties {
         this.issuer = issuer;
     }
 
+    @PostConstruct
+    public void init() {
+        validate();
+        logger.info("JWT properties validated successfully");
+    }
 
     public void validate() {
         if (secret == null || secret.trim().isEmpty()) {

@@ -3,6 +3,7 @@ package org.instagram.apigateway.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -17,15 +18,18 @@ public class CorsConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(CorsConfig.class);
 
+    private final CorsProperties corsProperties;
+
+    @Autowired
+    public CorsConfig(CorsProperties corsProperties) {
+        this.corsProperties = corsProperties;
+    }
+
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
-        corsConfig.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://frontend:3000"
-        ));
+        corsConfig.setAllowedOrigins(corsProperties.getAllowedOrigins());
 
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
@@ -67,3 +71,5 @@ public class CorsConfig {
         return new ObjectMapper();
     }
 }
+
+

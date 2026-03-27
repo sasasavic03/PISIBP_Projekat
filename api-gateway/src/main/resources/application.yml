@@ -3,8 +3,16 @@ spring:
     name: api-gateway
   main:
     web-application-type: reactive
+  webflux:
+    multipart:
+      max-in-memory-size: 5242880
   cloud:
     gateway:
+      httpclient:
+        socket:
+          connect-timeout-millis: 5000
+      httpserver:
+        wiretap: false
       server:
         webflux:
           routes:
@@ -39,16 +47,16 @@ spring:
             - id: follow-service
               uri: http://follow-service:8080
               predicates:
-                - Path=/api/follow/**
+                - Path=/api/follows/**
               filters:
-                - RewritePath=/api/follow(?<segment>/?.*), /api/follow${segment}
+                - RewritePath=/api/follows(?<segment>/?.*), /api/follow${segment}
 
             - id: interaction-service
               uri: http://interaction-service:8080
               predicates:
-                - Path=/api/likes/**,/api/comments/**
+                - Path=/api/likes/**,/api/comments/**,/api/interactions/**
               filters:
-                - RewritePath=/api/(likes|comments)(?<segment>/?.*), /api/$1${segment}
+                - RewritePath=/api/(likes|comments|interactions)(?<segment>/?.*), /api/$1${segment}
 
             - id: block-service
               uri: http://block-service:8080
@@ -60,9 +68,9 @@ spring:
             - id: feed-service
               uri: http://feed-service:8080
               predicates:
-                - Path=/api/feed/**
+                - Path=/api/feeds/**
               filters:
-                - RewritePath=/api/feed(?<segment>/?.*), /api/feed${segment}
+                - RewritePath=/api/feeds(?<segment>/?.*), /api/feed${segment}
 
             - id: notification-service
               uri: http://notification-service:8080
@@ -78,7 +86,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway
+        include: health,info
   endpoint:
     health:
       show-details: always
@@ -88,6 +96,26 @@ jwt:
   expiration: ${JWT_EXPIRATION:86400000}
   algorithm: HS256
   issuer: instagram-auth-service
+
+# CORS Configuration
+cors:
+  allowed-origins:
+    - http://localhost:3000
+    - http://localhost:5173
+    - http://frontend:3000
+
+# Gateway Configuration - Public endpoints that do not require JWT authentication
+gateway:
+  public-endpoints:
+    - /api/auth/login
+    - /api/auth/register
+    - /api/auth/refresh
+    - /api/auth/validate
+    - /api/posts/media/
+    - /api/interactions/posts/batch
+    - /health
+    - /api/health
+    - /actuator/health
 
 logging:
   level:

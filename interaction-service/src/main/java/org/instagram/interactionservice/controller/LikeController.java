@@ -46,10 +46,12 @@ public class LikeController {
                 like.getCreatedAt()
         );
 
+        Long likesCount = likeService.getLikeCount(request.getPostId());
+
         Map<String, Object> result = new HashMap<>();
         result.put("message", "Post liked successfully");
         result.put("like", response);
-
+        result.put("likesCount", likesCount);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
@@ -60,9 +62,11 @@ public class LikeController {
             @Valid @RequestBody LikeRequestDto request) {
         likeService.unlikePost(userId, request.getPostId());
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Post unliked successfully");
+        Long likesCount = likeService.getLikeCount(request.getPostId());
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Post unliked successfully");
+        response.put("likesCount", likesCount);
         return ResponseEntity.ok(response);
     }
 
@@ -127,14 +131,5 @@ public class LikeController {
         
         return ResponseEntity.ok(likeDtos);
     }
-
-
-    private Map<String, String> createErrorResponse(String message) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", message);
-        return error;
-    }
-
-
 
 }

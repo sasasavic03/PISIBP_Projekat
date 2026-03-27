@@ -20,9 +20,6 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(JwtProperties jwtProperties) {
         this.jwtProperties = jwtProperties;
-        // Validate JWT properties at startup
-        this.jwtProperties.validate();
-        // Pre-compute signing key for better performance
         this.signingKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
         logger.info("JwtTokenProvider initialized with issuer: {} and algorithm: {}", 
                    jwtProperties.getIssuer(), 
@@ -182,6 +179,7 @@ public class JwtTokenProvider {
     private JwtParser getParser() {
         return Jwts.parserBuilder()
                 .setSigningKey(signingKey)
+                .requireIssuer(jwtProperties.getIssuer())
                 .build();
     }
 

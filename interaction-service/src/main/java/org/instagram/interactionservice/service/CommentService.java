@@ -8,7 +8,6 @@ import org.instagram.interactionservice.exception.UnauthorizedException;
 import org.instagram.interactionservice.repository.CommentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +18,6 @@ public class CommentService {
 
     @Autowired
     private CommentRepository commentRepository;
-
-    @Value("${post.service.url}")
-    private String postServiceUrl;
 
 
     @Transactional
@@ -41,11 +37,7 @@ public class CommentService {
         comment.setIsEdited(false);
         comment.setIsDeleted(false);
 
-        Comment savedComment = commentRepository.save(comment);
-
-        updatePostCommentCount(postId);
-
-        return savedComment;
+        return commentRepository.save(comment);
     }
 
     public List<Comment> getPostComments(Long postId) {
@@ -92,31 +84,10 @@ public class CommentService {
         comment.setIsDeleted(true);
         comment.setContent("[Deleted]");
         commentRepository.save(comment);
-
-        updatePostCommentCount(comment.getPostId());
     }
 
     public Long getCommentCount(Long postId) {
         return commentRepository.countByPostIdAndIsDeletedFalse(postId);
     }
-
-
-    private void updatePostCommentCount(Long postId) {
-        try {
-            Long commentCount = commentRepository.countByPostIdAndIsDeletedFalse(postId);
-
-            System.out.println("Post " + postId + " now has " + commentCount + " comments");
-
-        } catch (Exception e) {
-            System.err.println("Failed to update post comment count: " + e.getMessage());
-        }
-    }
-
-
-
-
-
-
-
 
 }
