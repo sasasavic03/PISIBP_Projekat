@@ -3,6 +3,7 @@ package org.instagram.feedservice.client;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 import java.util.Arrays;
 
@@ -12,11 +13,12 @@ public class FollowServiceClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String FOLLOW_SERVICE_URL = "http://localhost:8088/api/follows";
+    @Value("${services.follow.url:http://follow-service:8080}")
+    private String followServiceUrl;
 
     public List<Long> getFollowingList(Long userId) {
         try {
-            String url = FOLLOW_SERVICE_URL + "/following/" + userId;
+            String url = followServiceUrl + "/api/follow/following/" + userId;
             FollowingResponse response = restTemplate.getForObject(url, FollowingResponse.class);
             return response != null && response.getFollowingIds() != null ? 
                 response.getFollowingIds() : Arrays.asList();

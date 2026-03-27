@@ -141,16 +141,32 @@ public class FeedService {
     private List<FeedPostDTO> fetchAllUserFeedPosts(Long userId) {
         // Fetch following list
         String followingUrl = followServiceUrl + "/follow/" + userId + "/following";
-        ResponseEntity<List<Long>> followingResponse = restTemplate.exchange(
+        ResponseEntity<List<Map<String, Object>>> followingResponse = restTemplate.exchange(
                 followingUrl,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<Long>>() {}
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
         );
 
-        List<Long> followingUserIds = followingResponse.getBody();
+        List<Map<String, Object>> followingData = followingResponse.getBody();
 
-        if (followingUserIds == null || followingUserIds.isEmpty()) {
+        if (followingData == null || followingData.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Extract followingId from each response
+        List<Long> followingUserIds = followingData.stream()
+                .map(item -> {
+                    Object followingId = item.get("followingId");
+                    if (followingId instanceof Number) {
+                        return ((Number) followingId).longValue();
+                    }
+                    return null;
+                })
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (followingUserIds.isEmpty()) {
             return new ArrayList<>();
         }
 

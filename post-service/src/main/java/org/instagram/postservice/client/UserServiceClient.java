@@ -3,6 +3,7 @@ package org.instagram.postservice.client;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class UserServiceClient {
@@ -10,11 +11,12 @@ public class UserServiceClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String USER_SERVICE_URL = "http://localhost:8081/api/users";
+    @Value("${services.user.url:http://user-service:8080}")
+    private String userServiceUrl;
 
     public UserResponse getUserDetails(Long userId) {
         try {
-            String url = USER_SERVICE_URL + "/" + userId;
+            String url = userServiceUrl + "/users/" + userId;
             return restTemplate.getForObject(url, UserResponse.class);
         } catch (Exception e) {
             // Log error and return basic user info

@@ -39,11 +39,29 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<?> createPost(
-            @RequestParam Long userId,
+            @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) String description,
-            @RequestPart List<MultipartFile> mediaFiles) {
+            @RequestPart(required = false) List<MultipartFile> files,
+            @RequestPart(required = false) List<MultipartFile> mediaFiles) {
         try {
-            Post post = postService.createPost(userId, description, mediaFiles);
+            if (userId == null || userId <= 0) {
+                return ResponseEntity.badRequest().body(createErrorResponse("Invalid user ID"));
+            }
+            if (description != null && description.length() > 2000) {
+                return ResponseEntity.badRequest().body(createErrorResponse("Description cannot exceed 2000 characters"));
+            }
+
+            if (files != null && mediaFiles != null) {
+                return ResponseEntity.badRequest().body(createErrorResponse("Use either 'files' or 'mediaFiles' parameter, not both"));
+            }
+
+            List<MultipartFile> uploadFiles = files != null ? files : mediaFiles;
+            
+            if (uploadFiles == null) {
+                uploadFiles = new ArrayList<>();
+            }
+            
+            Post post = postService.createPost(userId, description, uploadFiles);
             postService.enrichPostWithCounts(post);
             
             PostWithUserDTO response = buildPostWithUserDTO(post);
@@ -75,12 +93,10 @@ public class PostController {
         try {
             List<Post> posts = postService.getUserPosts(userId);
             
-            // Enrich all posts with counts and user details
+            postService.enrichPostsWithCounts(posts);
+            
             List<PostWithUserDTO> response = posts.stream()
-                    .map(post -> {
-                        postService.enrichPostWithCounts(post);
-                        return buildPostWithUserDTO(post);
-                    })
+                    .map(this::buildPostWithUserDTO)
                     .collect(Collectors.toList());
             
             return ResponseEntity.ok(response);
@@ -97,12 +113,10 @@ public class PostController {
             
             List<Post> posts = postService.getPostsByUserIds(userIds);
             
-            // Enrich all posts with counts and user details
+            postService.enrichPostsWithCounts(posts);
+            
             List<PostWithUserDTO> response = posts.stream()
-                    .map(post -> {
-                        postService.enrichPostWithCounts(post);
-                        return buildPostWithUserDTO(post);
-                    })
+                    .map(this::buildPostWithUserDTO)
                     .collect(Collectors.toList());
             
             return ResponseEntity.ok(response);
@@ -115,9 +129,9 @@ public class PostController {
     @PatchMapping("/{id}/description")
     public ResponseEntity<?> updateDescription(
             @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long userId,
             @RequestBody Map<String, Object> request) {
         try {
-            Long userId = Long.valueOf(request.get("userId").toString());
             String description = (String) request.get("description");
 
             Post post = postService.updateDescription(id, userId, description);
@@ -133,14 +147,9 @@ public class PostController {
     @PatchMapping("/{id}")
     public ResponseEntity<?> updatePost(
             @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long userId,
             @RequestBody PostUpdateDTO updateDTO) {
         try {
-            Long userId = updateDTO.getUserId();
-            if (userId == null) {
-                return ResponseEntity.badRequest()
-                        .body(createErrorResponse("User ID must be provided in request body"));
-            }
-
             Post post = postService.updatePost(id, userId, updateDTO);
             postService.enrichPostWithCounts(post);
             
@@ -158,7 +167,7 @@ public class PostController {
     public ResponseEntity<?> removeMedia(
             @PathVariable Long postId,
             @PathVariable Long mediaId,
-            @RequestParam Long userId) {
+            @RequestHeader("X-User-Id") Long userId) {
         try {
             Post post = postService.removeMedia(postId, userId, mediaId);
             return ResponseEntity.ok(post);
@@ -171,7 +180,7 @@ public class PostController {
     public ResponseEntity<?> removeMediaByIndex(
             @PathVariable Long postId,
             @PathVariable Integer mediaIndex,
-            @RequestParam Long userId) {
+            @RequestHeader("X-User-Id") Long userId) {
         try {
             Post post = postService.removeMediaByIndex(postId, userId, mediaIndex);
             return ResponseEntity.ok(post);
@@ -184,7 +193,7 @@ public class PostController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePost(
             @PathVariable Long id,
-            @RequestParam Long userId) {
+            @RequestHeader("X-User-Id") Long userId) {
         try {
             postService.deletePost(id, userId);
             Map<String, String> response = new HashMap<>();
@@ -262,7 +271,15 @@ public class PostController {
     }
 
     private PostWithUserDTO buildPostWithUserDTO(Post post) {
-        UserServiceClient.UserResponse userDetails = postService.getUserDetails(post.getUserId());
+        UserServiceClient.UserResponse userDetails = null;
+        
+        try {
+            userDetails = postService.getUserDetails(post.getUserId());
+        } catch (Exception e) {
+            userDetails = new UserServiceClient.UserResponse();
+            userDetails.setId(post.getUserId());
+            userDetails.setUsername("Unknown User");
+        }
         
         PostWithUserDTO dto = new PostWithUserDTO();
         dto.setId(post.getId());

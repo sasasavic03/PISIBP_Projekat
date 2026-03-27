@@ -8,9 +8,6 @@ import lombok.Data;
 @Data
 public class CommentRequestDto {
     
-    @NotNull(message = "User ID is required")
-    private Long userId;
-    
     @NotNull(message = "Post ID is required")
     private Long postId;
     

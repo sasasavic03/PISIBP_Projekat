@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/likes")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class LikeController {
 
     @Autowired
@@ -35,8 +34,10 @@ public class LikeController {
 
 
     @PostMapping
-    public ResponseEntity<?> likePost(@Valid @RequestBody LikeRequestDto request) {
-        Like like = likeService.likePost(request.getUserId(), request.getPostId());
+    public ResponseEntity<?> likePost(
+            @RequestHeader("X-User-Id") Long userId,
+            @Valid @RequestBody LikeRequestDto request) {
+        Like like = likeService.likePost(userId, request.getPostId());
 
         LikeResponseDto response = new LikeResponseDto(
                 like.getId(),
@@ -55,9 +56,9 @@ public class LikeController {
 
     @DeleteMapping
     public ResponseEntity<?> unlikePost(
-            @RequestParam Long userId,
-            @RequestParam Long postId) {
-        likeService.unlikePost(userId, postId);
+            @RequestHeader("X-User-Id") Long userId,
+            @Valid @RequestBody LikeRequestDto request) {
+        likeService.unlikePost(userId, request.getPostId());
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "Post unliked successfully");
@@ -99,7 +100,7 @@ public class LikeController {
 
     @GetMapping("/check")
     public ResponseEntity<Map<String, Boolean>> checkLike(
-            @RequestParam Long userId,
+            @RequestHeader("X-User-Id") Long userId,
             @RequestParam Long postId) {
 
         boolean liked = likeService.hasUserLikedPost(userId, postId);

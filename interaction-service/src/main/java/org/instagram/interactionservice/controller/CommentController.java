@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/comments")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class CommentController {
 
     @Autowired
@@ -34,16 +33,13 @@ public class CommentController {
     }
 
 
-    /**
-     * Add a comment to a post
-     * POST /api/comments
-     * Body: { "userId": 123, "postId": 1, "content": "Great post!" }
-     */
 
     @PostMapping
-    public ResponseEntity<?> addComment(@Valid @RequestBody CommentRequestDto request) {
+    public ResponseEntity<?> addComment(
+            @RequestHeader("X-User-Id") Long userId,
+            @Valid @RequestBody CommentRequestDto request) {
         Comment comment = commentService.addComment(
-                request.getUserId(),
+                userId,
                 request.getPostId(),
                 request.getContent()
         );
@@ -80,10 +76,11 @@ public class CommentController {
     @PatchMapping("/{commentId}")
     public ResponseEntity<?> updateComment(
             @PathVariable Long commentId,
+            @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody CommentUpdateDto request) {
         Comment comment = commentService.updateComment(
                 commentId,
-                request.getUserId(),
+                userId,
                 request.getContent()
         );
         
@@ -94,7 +91,7 @@ public class CommentController {
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(
             @PathVariable Long commentId,
-            @RequestParam Long userId) {
+            @RequestHeader("X-User-Id") Long userId) {
         commentService.deleteComment(commentId, userId);
 
         Map<String, String> response = new HashMap<>();

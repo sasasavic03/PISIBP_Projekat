@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: interaction-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/instagram}
+    username: ${SPRING_DATASOURCE_USERNAME:user}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: 8080
+
+# Service URLs
+services:
+  post:
+    url: ${SERVICES_POST_URL:http://post-service:8080}
+
+logging:
+  level:
+    root: INFO
+

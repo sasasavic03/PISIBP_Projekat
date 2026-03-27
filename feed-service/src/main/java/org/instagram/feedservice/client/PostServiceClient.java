@@ -3,6 +3,7 @@ package org.instagram.feedservice.client;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,11 +15,14 @@ public class PostServiceClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String POST_SERVICE_URL = "http://localhost:8080/api/posts";
+    private static final String POST_SERVICE_URL = "http://post-service:8080/api/posts";
+    
+    @Value("${post.service.url:http://post-service:8080}")
+    private String postServiceUrl;
 
     public List<PostResponse> getPostsByUserIds(List<Long> userIds) {
         try {
-            String url = POST_SERVICE_URL + "/feed";
+            String url = postServiceUrl + "/posts/feed";
             
             Map<String, Object> request = new HashMap<>();
             request.put("userIds", userIds);

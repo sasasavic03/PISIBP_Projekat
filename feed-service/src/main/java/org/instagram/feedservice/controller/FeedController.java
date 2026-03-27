@@ -12,7 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/feed")
-@CrossOrigin(origins = "*")
 public class FeedController {
 
     @Autowired
@@ -58,6 +57,18 @@ public class FeedController {
         }
     }
 
+    @GetMapping("/{userId}/all")
+    public ResponseEntity<?> getUserProfileFeedComplete(@PathVariable Long userId) {
+        try {
+            List<FeedPostDTO> feed = feedService.getUserProfileFeed(userId);
+            return ResponseEntity.ok(feed);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserProfileFeed(
             @PathVariable Long userId,
@@ -71,18 +82,6 @@ public class FeedController {
 
             Map<String, Object> feedData = feedService.getUserProfileFeedPaginated(userId, page, size);
             return ResponseEntity.ok(feedData);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
-    }
-
-    @GetMapping("/{userId}/all")
-    public ResponseEntity<?> getUserProfileFeedComplete(@PathVariable Long userId) {
-        try {
-            List<FeedPostDTO> feed = feedService.getUserProfileFeed(userId);
-            return ResponseEntity.ok(feed);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());

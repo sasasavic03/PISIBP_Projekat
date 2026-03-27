@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: post-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/instagram}
+    username: ${SPRING_DATASOURCE_USERNAME:user}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+server:
+  port: 8080
+
+# Minio Configuration
+minio:
+  url: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket-name: ${MINIO_BUCKET_NAME:posts}
+  use-ssl: ${MINIO_USE_SSL:false}
+
+# Service URLs
+services:
+  user:
+    url: ${SERVICES_USER_URL:http://user-service:8080}
+  interaction:
+    url: ${SERVICES_INTERACTION_URL:http://interaction-service:8080}
+
+logging:
+  level:
+    root: INFO
+

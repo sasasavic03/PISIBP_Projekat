@@ -59,12 +59,11 @@ class LikeControllerTest {
     @DisplayName("Should like post and return CREATED status with like object")
     void likePost_returnsCreatedMessageAndLike() {
         LikeRequestDto req = new LikeRequestDto();
-        req.setUserId(1L);
         req.setPostId(2L);
 
         when(likeService.likePost(1L, 2L)).thenReturn(testLike);
 
-        ResponseEntity<?> resp = controller.likePost(req);
+        ResponseEntity<?> resp = controller.likePost(1L, req);
 
         assertEquals(HttpStatus.CREATED, resp.getStatusCode());
         @SuppressWarnings("unchecked")
@@ -81,7 +80,10 @@ class LikeControllerTest {
     @Test
     @DisplayName("Should unlike post and return success message")
     void unlikePost_callsServiceAndReturnsOk() {
-        ResponseEntity<?> resp = controller.unlikePost(1L, 2L);
+        LikeRequestDto req = new LikeRequestDto();
+        req.setPostId(2L);
+
+        ResponseEntity<?> resp = controller.unlikePost(1L, req);
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         @SuppressWarnings("unchecked")

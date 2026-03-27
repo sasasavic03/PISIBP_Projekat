@@ -64,13 +64,12 @@ class CommentControllerTest {
     @DisplayName("Should add comment and return CREATED status")
     void addComment_returnsCreatedAndDto() {
         CommentRequestDto req = new CommentRequestDto();
-        req.setUserId(1L);
         req.setPostId(2L);
         req.setContent("Test comment");
 
         when(commentService.addComment(1L, 2L, "Test comment")).thenReturn(testComment);
 
-        ResponseEntity<?> resp = controller.addComment(req);
+        ResponseEntity<?> resp = controller.addComment(1L, req);
 
         assertEquals(HttpStatus.CREATED, resp.getStatusCode());
         assertNotNull(resp.getBody());
@@ -138,7 +137,6 @@ class CommentControllerTest {
     @DisplayName("Should update comment and return updated object")
     void updateComment_callsServiceAndReturnsOk() {
         CommentUpdateDto req = new CommentUpdateDto();
-        req.setUserId(1L);
         req.setContent("Updated content");
 
         Comment updated = new Comment();
@@ -153,7 +151,7 @@ class CommentControllerTest {
 
         when(commentService.updateComment(1L, 1L, "Updated content")).thenReturn(updated);
 
-        ResponseEntity<?> resp = controller.updateComment(1L, req);
+        ResponseEntity<?> resp = controller.updateComment(1L, 1L, req);
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         verify(commentService).updateComment(1L, 1L, "Updated content");

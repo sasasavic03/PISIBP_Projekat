@@ -14,9 +14,6 @@ import java.util.List;
 @Builder
 public class PostUpdateDTO {
 
-    @JsonProperty("user_id")
-    private Long userId;
-
     private String description;
 
     @JsonProperty("is_active")

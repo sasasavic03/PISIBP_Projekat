@@ -55,17 +55,31 @@ public class PostService {
 
         post = postRepository.save(post);
 
-        for (int i = 0; i < mediaFiles.size(); i++) {
-            MultipartFile file = mediaFiles.get(i);
-            String storedFilename = fileStorageService.storeFile(file);
-            
-            Media media = new Media();
-            media.setPost(post);
-            media.setMediaUrl(storedFilename);
-            media.setMediaType(determineMediaType(file.getOriginalFilename()));
-            media.setOrderIndex(i);
+        java.util.List<String> uploadedFilenames = new java.util.ArrayList<>();
+        
+        try {
+            for (int i = 0; i < mediaFiles.size(); i++) {
+                MultipartFile file = mediaFiles.get(i);
+                String storedFilename = fileStorageService.storeFile(file);
+                uploadedFilenames.add(storedFilename);
+                
+                Media media = new Media();
+                media.setPost(post);
+                media.setMediaUrl(storedFilename);
+                media.setMediaType(determineMediaType(file.getOriginalFilename()));
+                media.setOrderIndex(i);
 
-            mediaRepository.save(media);
+                mediaRepository.save(media);
+            }
+        } catch (Exception e) {
+            for (String filename : uploadedFilenames) {
+                try {
+                    fileStorageService.deleteFile(filename);
+                } catch (Exception cleanupError) {
+                    System.err.println("Warning: Failed to cleanup file during rollback: " + filename + ", Error: " + cleanupError.getMessage());
+                }
+            }
+            throw e;
         }
         return postRepository.findById(post.getId()).orElse(post);
     }
@@ -86,6 +100,50 @@ public class PostService {
             return List.of();
         }
         return postRepository.findByUserIdInAndIsActiveTrueOrderByCreatedAtDesc(userIds);
+    }
+
+    public void enrichPostsWithCounts(List<Post> posts) {
+        if (posts == null || posts.isEmpty()) {
+            return;
+        }
+        
+        try {
+            java.util.List<Long> postIds = posts.stream()
+                    .map(Post::getId)
+                    .collect(java.util.stream.Collectors.toList());
+            
+            java.util.Map<Long, InteractionServiceClient.PostInteractionCounts> countsMap =
+                    interactionServiceClient.getCountsForPosts(postIds);
+            
+            if (countsMap == null || countsMap.isEmpty()) {
+                for (Post post : posts) {
+                    enrichPostWithCounts(post);
+                }
+                return;
+            }
+            
+            for (Post post : posts) {
+                InteractionServiceClient.PostInteractionCounts counts = countsMap.get(post.getId());
+                if (counts != null) {
+                    Long likeCount = counts.getLikeCount();
+                    Long commentCount = counts.getCommentCount();
+                    post.setLikesCount(likeCount != null ? likeCount.intValue() : 0);
+                    post.setCommentsCount(commentCount != null ? commentCount.intValue() : 0);
+                } else {
+                    post.setLikesCount(0);
+                    post.setCommentsCount(0);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Batch enrichment failed, falling back to individual calls: " + e.getMessage());
+            for (Post post : posts) {
+                try {
+                    enrichPostWithCounts(post);
+                } catch (Exception inner) {
+                    System.err.println("Error enriching post " + post.getId() + ": " + inner.getMessage());
+                }
+            }
+        }
     }
 
 
@@ -109,17 +167,14 @@ public class PostService {
             throw new UnauthorizedException("You can only update your own posts");
         }
 
-        // Update description if provided
         if (updateDTO.getDescription() != null) {
             post.setDescription(updateDTO.getDescription());
         }
 
-        // Update active status if provided
         if (updateDTO.getIsActive() != null) {
             post.setIsActive(updateDTO.getIsActive());
         }
 
-        // Remove media if specified
         if (updateDTO.getMediaIdsToRemove() != null && !updateDTO.getMediaIdsToRemove().isEmpty()) {
             for (Long mediaId : updateDTO.getMediaIdsToRemove()) {
                 Media media = mediaRepository.findById(mediaId)
@@ -129,16 +184,13 @@ public class PostService {
                     throw new BadRequestException("Media does not belong to this post");
                 }
 
-                // Delete file from storage
                 fileStorageService.deleteFile(media.getMediaUrl());
                 mediaRepository.delete(media);
             }
 
-            // Update media count
             Long newCount = mediaRepository.countByPostId(postId);
             post.setMediaCount(newCount.intValue());
 
-            // If no media left, deactivate post
             if (newCount == 0) {
                 post.setIsActive(false);
             }
@@ -182,19 +234,15 @@ public class PostService {
             throw new UnauthorizedException("You can only modify your own posts");
         }
 
-        // Get media by index
         Media media = mediaRepository.findByPostIdAndOrderIndex(postId, mediaIndex)
                 .orElseThrow(() -> new ResourceNotFoundException("Media not found at index: " + mediaIndex));
 
-        // Delete file from storage
         fileStorageService.deleteFile(media.getMediaUrl());
         mediaRepository.delete(media);
 
-        // Update media count
         Long newCount = mediaRepository.countByPostId(postId);
         post.setMediaCount(newCount.intValue());
 
-        // If no media left, deactivate post
         if (newCount == 0) {
             post.setIsActive(false);
         }
@@ -210,7 +258,6 @@ public class PostService {
             throw new UnauthorizedException("You can only delete your own posts");
         }
 
-        // Delete all media files associated with the post
         List<Media> mediaList = mediaRepository.findByPostIdOrderByOrderIndexAsc(postId);
         for (Media media : mediaList) {
             fileStorageService.deleteFile(media.getMediaUrl());
