@@ -90,7 +90,11 @@ export default function ProfilePage(){
       <section className="profile-header">
         <ProfileHeader
           user={profile}
-          stats={stats}
+          stats={{
+            posts: stats?.postsCount || 0,
+            followers: stats?.followersCount || 0,
+            following: stats?.followingCount || 0
+          }}
           isOwnProfile={isOwnProfile}
         />
       </section>

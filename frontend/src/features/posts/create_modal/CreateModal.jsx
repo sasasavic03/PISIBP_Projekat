@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import "./createmodal.css";
 import { FiX, FiChevronLeft, FiImage } from "react-icons/fi";
-import { createPost } from "../../api/postApi";
+import { createPost } from "../../../api/postApi";
 
 const MAX_FILES = 20;
 const MAX_SIZE_MB = 50;

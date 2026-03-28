@@ -1,6 +1,6 @@
 import React from "react";
 import "./profileoptionsmodal.css";
-import { blockUser } from "../../api/userApi";
+import { blockUser } from "../../../api/userApi";
 import { useNavigate } from "react-router-dom";
 
 export default function ProfileOptionsModal({ userId, onClose }) {

@@ -3,6 +3,7 @@ import PostModal from "../posts/post_modal/PostModal";
 import "./postsgrid.css";
 import { FiHeart, FiMessageSquare } from "react-icons/fi";
 import { getUserPosts } from "../../api/postApi";
+import { getUserProfile } from "../../api/userApi";
 import { deletePost, deletePostMedia } from "../../api/postApi";
 
 export default function PostsGrid({ username, isOwnProfile }) {
@@ -21,12 +22,17 @@ export default function PostsGrid({ username, isOwnProfile }) {
       setLoading(true);
       setError(null);
       try {
-        const data = await getUserPosts(username);
+        const userProfile = await getUserProfile(username);
+        const userId = userProfile.id;
+
+        const data = await getUserPosts(userId);
         const mapped = data.map(post => ({
           id: post.id,
-          image: post.image,
-          images: post.images,
-          likes: post.likesCount,
+          image: post.media_list && post.media_list.length > 0
+              ? constructMediaUrl(post.media_list[0].media_url)
+              : null,
+          images: post.media_list?.map(m => constructMediaUrl(m.media_url)) || [],
+          likes: post.likes_count || 0,
           likedBy: post.likedBy ?? [],
           comments: post.comments ?? [],
           content: post.description,
@@ -51,6 +57,14 @@ export default function PostsGrid({ username, isOwnProfile }) {
     const currentLength = visiblePosts.length;
     const nextPosts = posts.slice(currentLength, currentLength + POSTS_PER_LOAD);
     setVisiblePosts([...visiblePosts, ...nextPosts]);
+  }
+
+  function constructMediaUrl(mediaUrl) {
+    if (!mediaUrl) return null;
+    if (mediaUrl.startsWith('http')) {
+      return mediaUrl;
+    }
+    return `http://localhost:8080/api/posts/media/${mediaUrl}`;
   }
 
   useEffect(() => {
