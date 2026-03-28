@@ -5,6 +5,7 @@ import org.instagram.user_service.client.FollowServiceClient;
 import org.instagram.user_service.dto.CreateUserRequest;
 import org.instagram.user_service.dto.SuggestionDTO;
 import org.instagram.user_service.dto.UpdateProfileRequest;
+import org.instagram.user_service.dto.UpdatePrivacyRequest;
 import org.instagram.user_service.dto.UserResponse;
 import org.instagram.user_service.dto.UserSearchResultDTO;
 import org.instagram.user_service.service.UserService;
@@ -56,6 +57,15 @@ public class UserController {
             @RequestHeader("X-User-Id") Long currentUserId,
             @Valid @RequestBody UpdateProfileRequest request) {
         UserResponse response = userService.updateUser(id, currentUserId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/privacy")
+    public ResponseEntity<UserResponse> updatePrivacy(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long currentUserId,
+            @RequestBody UpdatePrivacyRequest request) {
+        UserResponse response = userService.updatePrivacy(id, currentUserId, request.getIsPrivate());
         return ResponseEntity.ok(response);
     }
 

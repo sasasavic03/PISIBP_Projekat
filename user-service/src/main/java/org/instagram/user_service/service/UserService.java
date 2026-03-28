@@ -43,7 +43,14 @@ public class UserService {
             throw new UserAlreadyExistsException("Email already exists");
         }
 
+        if (request.getId() != null && userRepository.existsById(request.getId())) {
+            throw new UserAlreadyExistsException("User profile ID already exists");
+        }
+
         User user = new User();
+        if (request.getId() != null) {
+            user.setId(request.getId());
+        }
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setCreatedAt(LocalDateTime.now());
@@ -143,4 +150,20 @@ public class UserService {
 
         return response;
     }
+
+    public UserResponse updatePrivacy(Long userId, Long currentUserId, Boolean isPrivate) {
+        if (!userId.equals(currentUserId)) {
+            throw new UnauthorizedException("You can only update your own profile");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        user.setPrivate(isPrivate);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        
+        return mapToResponse(user);
+    }
 }
+

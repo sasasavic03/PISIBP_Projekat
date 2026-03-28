@@ -65,9 +65,10 @@ public class AuthService {
             throw new RuntimeException("Registration failed - could not create user profile");
         }
 
-        String token = jwtService.generateToken(user.getUsername(), user.getId());
+        Long canonicalUserId = resolveCanonicalUserId(user);
+        String token = jwtService.generateToken(user.getUsername(), canonicalUserId);
 
-        return new AuthResponse(token, user.getId(), user.getUsername(), null);
+        return new AuthResponse(token, canonicalUserId, user.getUsername(), null);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -80,9 +81,22 @@ public class AuthService {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
-        String token = jwtService.generateToken(user.getUsername(), user.getId());
+        Long canonicalUserId = resolveCanonicalUserId(user);
+        String token = jwtService.generateToken(user.getUsername(), canonicalUserId);
 
-        return new AuthResponse(token, user.getId(), user.getUsername(), null);
+        return new AuthResponse(token, canonicalUserId, user.getUsername(), null);
+    }
+
+    private Long resolveCanonicalUserId(User user) {
+        try {
+            UserProfileResponse profile = userServiceClient.getUserByUsername(user.getUsername());
+            if (profile != null && profile.getId() != null) {
+                return profile.getId();
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to resolve profile id for user {}. Falling back to auth id {}", user.getUsername(), user.getId());
+        }
+        return user.getId();
     }
 
     public boolean validateToken(String token) {
