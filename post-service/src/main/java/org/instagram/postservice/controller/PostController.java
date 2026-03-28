@@ -6,6 +6,7 @@ import org.instagram.postservice.dto.PostWithUserDTO;
 import org.instagram.postservice.entity.Post;
 import org.instagram.postservice.service.FileStorageService;
 import org.instagram.postservice.service.PostService;
+import org.instagram.postservice.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api/posts")
@@ -27,7 +30,11 @@ public class PostController {
     private PostService postService;
 
     @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
     private FileStorageService fileStorageService;
+
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
@@ -44,6 +51,12 @@ public class PostController {
             @RequestPart(required = false) List<MultipartFile> files,
             @RequestPart(required = false) List<MultipartFile> mediaFiles) {
         try {
+            System.out.println("=== POST /api/posts ===");
+            System.out.println("userId: " + userId);
+            System.out.println("description: " + description);
+            System.out.println("files: " + (files != null ? files.size() : "null"));
+            System.out.println("mediaFiles: " + (mediaFiles != null ? mediaFiles.size() : "null"));
+
             if (userId == null || userId <= 0) {
                 return ResponseEntity.badRequest().body(createErrorResponse("Invalid user ID"));
             }
@@ -56,7 +69,7 @@ public class PostController {
             }
 
             List<MultipartFile> uploadFiles = files != null ? files : mediaFiles;
-            
+
             if (uploadFiles == null) {
                 uploadFiles = new ArrayList<>();
             }
@@ -67,6 +80,8 @@ public class PostController {
             PostWithUserDTO response = buildPostWithUserDTO(post);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("ERROR in createPost: " + e.getMessage());
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }
@@ -92,6 +107,9 @@ public class PostController {
     public ResponseEntity<?> getUserPosts(@PathVariable Long userId) {
         try {
             List<Post> posts = postService.getUserPosts(userId);
+            if (posts == null) {
+                posts = new ArrayList<>();
+            }
             
             postService.enrichPostsWithCounts(posts);
             
@@ -101,6 +119,8 @@ public class PostController {
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error fetching user posts for userId " + userId + ": " + e.getMessage());
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }
@@ -264,6 +284,50 @@ public class PostController {
         }
     }
 
+    @PostMapping("/{postId}/likes-count")
+    public ResponseEntity<?> updateLikesCount(@PathVariable Long postId, @RequestBody Map<String, Object> body) {
+        try {
+            if (body == null || body.get("likesCount") == null) {
+                String msg = "Missing likesCount in request body";
+                System.err.println(msg);
+                return ResponseEntity.badRequest().body(createErrorResponse(msg));
+            }
+            
+            Post post = postService.getPostById(postId);
+            Integer likesCount = ((Number) body.get("likesCount")).intValue();
+            post.setLikesCount(likesCount);
+            postRepository.save(post);
+            System.out.println("Updated post " + postId + " likesCount to " + likesCount);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Likes count updated"));
+        } catch (Exception e) {
+            System.err.println("Error updating likes count for post " + postId + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{postId}/comments-count")
+    public ResponseEntity<?> updateCommentsCount(@PathVariable Long postId, @RequestBody Map<String, Object> body) {
+        try {
+            if (body == null || body.get("commentsCount") == null) {
+                String msg = "Missing commentsCount in request body";
+                System.err.println(msg);
+                return ResponseEntity.badRequest().body(createErrorResponse(msg));
+            }
+            
+            Post post = postService.getPostById(postId);
+            Integer commentsCount = ((Number) body.get("commentsCount")).intValue();
+            post.setCommentsCount(commentsCount);
+            postRepository.save(post);
+            System.out.println("Updated post " + postId + " commentsCount to " + commentsCount);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Comments count updated"));
+        } catch (Exception e) {
+            System.err.println("Error updating comments count for post " + postId + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);
@@ -285,7 +349,22 @@ public class PostController {
         dto.setId(post.getId());
         dto.setUserId(post.getUserId());
         dto.setDescription(post.getDescription());
-        dto.setMediaList(post.getMediaList());
+        
+        // Convert Media entities to MediaDTO for proper serialization - handle null mediaList
+        java.util.List<org.instagram.postservice.dto.MediaDTO> mediaDTOList = new java.util.ArrayList<>();
+        if (post.getMediaList() != null && !post.getMediaList().isEmpty()) {
+            mediaDTOList = post.getMediaList().stream()
+                    .map(media -> org.instagram.postservice.dto.MediaDTO.builder()
+                            .id(media.getId())
+                            .mediaUrl(media.getMediaUrl())
+                            .mediaType(media.getMediaType())
+                            .orderIndex(media.getOrderIndex())
+                            .createdAt(media.getCreatedAt())
+                            .build())
+                    .collect(Collectors.toList());
+        }
+        
+        dto.setMediaList(mediaDTOList);
         dto.setMediaCount(post.getMediaCount());
         dto.setLikesCount(post.getLikesCount());
         dto.setCommentsCount(post.getCommentsCount());

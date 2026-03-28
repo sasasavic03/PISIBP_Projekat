@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,7 +51,10 @@ public class MinioService {
         }
 
         String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || !isValidFileExtension(originalFilename)) {
+        String contentType = file.getContentType();
+        
+        // Validate file based on extension or content type
+        if (!isValidFile(originalFilename, contentType)) {
             throw new BadRequestException("Invalid file type. Allowed types: jpg, jpeg, png, gif, mp4, mov, avi, webm");
         }
 
@@ -63,8 +65,11 @@ public class MinioService {
         try {
             // Generate unique filename with UUID
             String fileExtension = getFileExtension(originalFilename);
+            if (fileExtension.isEmpty()) {
+                fileExtension = getExtensionFromContentType(contentType);
+            }
             String filename = UUID.randomUUID() + "." + fileExtension;
-            String contentType = getContentType(originalFilename);
+            String resolvedContentType = getContentType(filename);
 
             // Upload to MinIO
             try (InputStream inputStream = file.getInputStream()) {
@@ -73,7 +78,7 @@ public class MinioService {
                                 .bucket(bucketName)
                                 .object(filename)
                                 .stream(inputStream, file.getSize(), -1)
-                                .contentType(contentType)
+                                .contentType(resolvedContentType)
                                 .build()
                 );
             }
@@ -187,13 +192,44 @@ public class MinioService {
     }
 
 
-    private boolean isValidFileExtension(String filename) {
-        String extension = getFileExtension(filename);
-        return ALLOWED_EXTENSIONS.contains(extension.toLowerCase());
+    private boolean isValidFile(String filename, String contentType) {
+        if (filename != null && !filename.isEmpty()) {
+            String extension = getFileExtension(filename);
+            if (!extension.isEmpty() && ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
+                return true;
+            }
+        }
+        
+        if (contentType != null && !contentType.isEmpty()) {
+            String lowerContentType = contentType.toLowerCase();
+            return lowerContentType.startsWith("image/") || lowerContentType.startsWith("video/");
+        }
+        
+        return false;
     }
 
+    private String getExtensionFromContentType(String contentType) {
+        if (contentType == null || contentType.isEmpty()) {
+            return "jpg"; // default
+        }
+        
+        String lowerType = contentType.toLowerCase();
+        if (lowerType.contains("jpeg")) return "jpg";
+        if (lowerType.contains("png")) return "png";
+        if (lowerType.contains("gif")) return "gif";
+        if (lowerType.contains("webp")) return "jpg"; // fallback
+        if (lowerType.contains("mp4")) return "mp4";
+        if (lowerType.contains("quicktime")) return "mov";
+        if (lowerType.contains("msvideo")) return "avi";
+        if (lowerType.contains("webm")) return "webm";
+        if (lowerType.startsWith("image/")) return "jpg";
+        if (lowerType.startsWith("video/")) return "mp4";
+        
+        return "jpg";
+    }
 
     private String getFileExtension(String filename) {
+        if (filename == null) return "";
         int lastIndex = filename.lastIndexOf('.');
         if (lastIndex > 0) {
             return filename.substring(lastIndex + 1);

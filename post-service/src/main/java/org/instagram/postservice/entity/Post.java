@@ -23,7 +23,7 @@ public class Post {
     @Column(length = 2000)
     private String description;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Media> mediaList = new ArrayList<>();
 
     @Column(name = "media_count")

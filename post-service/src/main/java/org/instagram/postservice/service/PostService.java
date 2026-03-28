@@ -295,4 +295,9 @@ public class PostService {
     public UserServiceClient.UserResponse getUserDetails(Long userId) {
         return userServiceClient.getUserDetails(userId);
     }
+
+    @Transactional
+    public Post updatePost(Post post) {
+        return postRepository.save(post);
+    }
 }

@@ -1,12 +1,12 @@
 package org.instagram.postservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.instagram.postservice.client.UserServiceClient;
-import org.instagram.postservice.entity.Media;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostWithUserDTO {
 
     private Long id;
@@ -25,7 +26,7 @@ public class PostWithUserDTO {
     private String description;
 
     @JsonProperty("media_list")
-    private List<Media> mediaList;
+    private List<MediaDTO> mediaList;
 
     @JsonProperty("media_count")
     private Integer mediaCount;

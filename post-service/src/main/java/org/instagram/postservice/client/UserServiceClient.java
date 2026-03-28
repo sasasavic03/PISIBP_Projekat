@@ -16,7 +16,7 @@ public class UserServiceClient {
 
     public UserResponse getUserDetails(Long userId) {
         try {
-            String url = userServiceUrl + "/users/" + userId;
+            String url = userServiceUrl + "/api/users/" + userId;
             return restTemplate.getForObject(url, UserResponse.class);
         } catch (Exception e) {
             // Log error and return basic user info
@@ -33,7 +33,9 @@ public class UserServiceClient {
         private String username;
         private String email;
         private String bio;
-        private String profilePic;
+        
+        @com.fasterxml.jackson.annotation.JsonProperty("profilePictureUrl")
+        private String profilePictureUrl;
 
         public Long getId() {
             return id;
@@ -67,12 +69,12 @@ public class UserServiceClient {
             this.bio = bio;
         }
 
-        public String getProfilePic() {
-            return profilePic;
+        public String getProfilePictureUrl() {
+            return profilePictureUrl;
         }
 
-        public void setProfilePic(String profilePic) {
-            this.profilePic = profilePic;
+        public void setProfilePictureUrl(String profilePictureUrl) {
+            this.profilePictureUrl = profilePictureUrl;
         }
     }
 }
