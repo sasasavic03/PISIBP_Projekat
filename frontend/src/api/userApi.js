@@ -88,3 +88,13 @@ export async function getSuggestions() {
   if (!response.ok) throw new Error("Failed to fetch suggestions");
   return response.json();
 }
+
+export async function updatePrivacy(userId, isPrivate) {
+  const response = await fetch(`${BASE_URL}/${userId}/privacy`, {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify({ isPrivate })
+  });
+  if (!response.ok) throw new Error("Failed to update privacy");
+  return response.json();
+}
