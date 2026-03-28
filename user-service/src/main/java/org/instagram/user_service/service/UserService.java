@@ -44,6 +44,7 @@ public class UserService {
         }
 
         User user = new User();
+        user.setId(request.getId());
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setCreatedAt(LocalDateTime.now());
@@ -78,7 +79,7 @@ public class UserService {
             user.getUsername(),
             user.getEmail(),
             user.getProfilePictureUrl(),
-            user.isPrivate()
+            user.getIsPrivate()
         ));
     }
 
@@ -95,7 +96,7 @@ public class UserService {
         }
 
         if (request.getIsPrivate() != null) {
-            user.setPrivate(request.getIsPrivate());
+            user.setIsPrivate(request.getIsPrivate());
         }
 
         userRepository.save(user);
@@ -155,7 +156,7 @@ public class UserService {
         response.setEmail(user.getEmail());
         response.setBio(user.getBio());
         response.setProfilePictureUrl(user.getProfilePictureUrl());
-        response.setPrivate(user.isPrivate());
+        response.setIsPrivate(user.getIsPrivate());
         response.setCreatedAt(user.getCreatedAt());
 
         return response;

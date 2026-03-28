@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -71,4 +73,9 @@ public class UserController {
         List<SuggestionDTO> suggestions = userService.getSuggestions(id, Math.min(limit, 50));
         return ResponseEntity.ok(suggestions);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(userService.getUser(userId));
+}
 }

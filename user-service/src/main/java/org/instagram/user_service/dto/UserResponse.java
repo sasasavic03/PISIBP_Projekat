@@ -32,7 +32,7 @@ public class UserResponse {
         return profilePictureUrl;
     }
 
-    public boolean isPrivate() {
+    public boolean getIsPrivate() {
         return isPrivate;
     }
 
@@ -60,7 +60,7 @@ public class UserResponse {
         this.profilePictureUrl = profilePictureUrl;
     }
 
-    public void setPrivate(boolean isPrivate) {
+    public void setIsPrivate(boolean isPrivate) {
         this.isPrivate = isPrivate;
     }
 

@@ -1,4 +1,4 @@
-package org.instagram.auth.dto;
+package org.instagram.user_service.dto;
 
 public class CreateUserRequest {
 
@@ -8,7 +8,7 @@ public class CreateUserRequest {
 
     public CreateUserRequest() {}
 
-    public CreateUserRequest(Long id, String username, String email) {
+    public CreateUserRequest(Long id ,String username, String email) {
         this.id = id;
         this.username = username;
         this.email = email;
