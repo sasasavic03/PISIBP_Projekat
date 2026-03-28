@@ -1,7 +1,9 @@
 package org.instagram.auth.security;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
 import org.instagram.auth.config.JwtProperties;
 import org.slf4j.Logger;
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -37,17 +40,17 @@ public class JwtService {
         }
 
         try {
-            Date now = new Date();
-            Date expirationDate = new Date(now.getTime() + jwtProperties.getExpiration());
+            Instant now = Instant.now();
+            Instant expirationInstant = now.plusMillis(jwtProperties.getExpiration());
 
             String token = Jwts.builder()
-                    .setSubject(username)
+                    .subject(username)
                     .claim("userId", userId)
                     .claim("type", TOKEN_TYPE)
-                    .setIssuedAt(now)
-                    .setExpiration(expirationDate)
-                    .setIssuer(jwtProperties.getIssuer())
-                    .signWith(signingKey, SignatureAlgorithm.HS256)
+                    .issuedAt(Date.from(now))
+                    .expiration(Date.from(expirationInstant))
+                    .issuer(jwtProperties.getIssuer())
+                    .signWith(signingKey)
                     .compact();
 
             logger.debug("Token generated successfully for user: {} (ID: {})", username, userId);
@@ -64,5 +67,57 @@ public class JwtService {
 
     public JwtProperties getJwtProperties() {
         return jwtProperties;
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith((javax.crypto.SecretKey) signingKey)
+                    .build()
+                    .parseSignedClaims(token);
+            logger.debug("Token validation successful");
+            return true;
+        } catch (ExpiredJwtException e) {
+            logger.warn("JWT token is expired: {}", e.getMessage());
+            return false;
+        } catch (JwtException | IllegalArgumentException e) {
+            logger.warn("Invalid JWT token: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public String refreshToken(String token) {
+        try {
+            Claims claims = extractClaims(token);
+            String username = claims.getSubject();
+            Long userId = claims.get("userId", Long.class);
+
+            if (username == null || userId == null) {
+                throw new RuntimeException("Invalid token: missing username or userId");
+            }
+
+            logger.debug("Token refreshed successfully for user: {} (ID: {})", username, userId);
+            return generateToken(username, userId);
+        } catch (Exception e) {
+            logger.error("Error refreshing token: {}", e.getMessage());
+            throw new RuntimeException("Failed to refresh token", e);
+        }
+    }
+
+    private Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith((javax.crypto.SecretKey) signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public Claims getAllClaimsFromToken(String token) {
+        try {
+            return extractClaims(token);
+        } catch (Exception e) {
+            logger.warn("Error extracting claims from token: {}", e.getMessage());
+            return null;
+        }
     }
 }

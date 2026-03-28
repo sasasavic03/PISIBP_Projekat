@@ -1,5 +1,6 @@
 package org.instagram.user_service.controller;
 
+import org.instagram.user_service.client.BlockServiceClient;
 import org.instagram.user_service.client.FollowServiceClient;
 import org.instagram.user_service.dto.CreateUserRequest;
 import org.instagram.user_service.dto.SuggestionDTO;
@@ -18,9 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import jakarta.validation.Valid;
 
 @RestController
@@ -28,14 +26,12 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private final UserService userService;
-    private final RestTemplate restTemplate;
+    private final BlockServiceClient blockServiceClient;
     private final FollowServiceClient followServiceClient;
 
-    private static final String BLOCK_SERVICE_URL = "http://block-service:8080/api/users";
-
-    public UserController(UserService userService, RestTemplate restTemplate, FollowServiceClient followServiceClient) {
+    public UserController(UserService userService, BlockServiceClient blockServiceClient, FollowServiceClient followServiceClient) {
         this.userService = userService;
-        this.restTemplate = restTemplate;
+        this.blockServiceClient = blockServiceClient;
         this.followServiceClient = followServiceClient;
     }
 
@@ -99,10 +95,10 @@ public class UserController {
 
         // Fetch follower and following counts from follow-service
         try {
-            List<Long> followers = followServiceClient.getFollowerIds(user.getId());
-            List<Long> following = followServiceClient.getFollowingIds(user.getId());
-            stats.put("followersCount", followers != null ? followers.size() : 0);
-            stats.put("followingCount", following != null ? following.size() : 0);
+            Long followersCount = followServiceClient.getFollowersCount(user.getId());
+            Long followingCount = followServiceClient.getFollowingCount(user.getId());
+            stats.put("followersCount", followersCount != null ? followersCount : 0);
+            stats.put("followingCount", followingCount != null ? followingCount : 0);
         } catch (Exception e) {
             stats.put("followersCount", 0);
             stats.put("followingCount", 0);
@@ -122,14 +118,8 @@ public class UserController {
     @GetMapping("/{id}/blocked")
     public ResponseEntity<?> getBlockedUsers(@PathVariable Long id) {
         try {
-            String url = BLOCK_SERVICE_URL + "/" + id + "/blocked";
-            ResponseEntity<List<?>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {}
-            );
-            return ResponseEntity.ok(response.getBody());
+            List<?> blockedUsers = blockServiceClient.getBlockedUsers(id);
+            return ResponseEntity.ok(blockedUsers);
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Failed to fetch blocked users");

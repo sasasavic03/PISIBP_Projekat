@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/follow";
+const BASE_URL = "http://localhost:8080/api/follows";
 
 function getToken() {
   return localStorage.getItem("token");

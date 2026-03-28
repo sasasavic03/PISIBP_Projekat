@@ -2,6 +2,7 @@ package org.instagram.auth.controller;
 
 import org.instagram.auth.dto.*;
 import org.instagram.auth.service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -23,6 +24,22 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody TokenRequest request) {
+        String newToken = authService.refreshToken(request.getToken());
+        return ResponseEntity.ok(new AuthResponse(newToken, null, null, null));
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<TokenValidationResponse> validateToken(@Valid @RequestBody TokenRequest request) {
+        boolean isValid = authService.validateToken(request.getToken());
+        if (isValid) {
+            return ResponseEntity.ok(new TokenValidationResponse(true, "Token is valid"));
+        } else {
+            return ResponseEntity.ok(new TokenValidationResponse(false, "Token is invalid or expired"));
+        }
     }
 
 }
