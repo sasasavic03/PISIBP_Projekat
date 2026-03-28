@@ -2,15 +2,15 @@ package org.instagram.auth.dto;
 
 public class LoginRequest {
 
-    private String login; // email ili username
+    private String username; // email or username
     private String password;
 
-    public String getLogin() {
-        return login;
+    public String getUsername() {
+        return username;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

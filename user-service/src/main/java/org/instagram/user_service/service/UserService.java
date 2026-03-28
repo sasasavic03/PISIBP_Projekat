@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,13 +71,28 @@ public class UserService {
             throw new InvalidUserDataException("Search query cannot be empty");
         }
 
-        Page<User> results = userRepository.searchUsers(query, pageable);
-        return results.map(user -> new UserSearchResultDTO(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getProfilePictureUrl(),
-            user.isPrivate()
+        // Search by username first
+        Page<User> usernameResults = userRepository.findByUsernameContainingIgnoreCase(query, pageable);
+        
+        // If we have results, return them mapped
+        if (usernameResults.hasContent()) {
+            return usernameResults.map(user -> new UserSearchResultDTO(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getProfilePictureUrl(),
+                    user.isPrivate()
+            ));
+        }
+        
+        // Otherwise search by email
+        Page<User> emailResults = userRepository.findByEmailContainingIgnoreCase(query, pageable);
+        return emailResults.map(user -> new UserSearchResultDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getProfilePictureUrl(),
+                user.isPrivate()
         ));
     }
 
@@ -107,44 +121,31 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         try {
+            // Get list of users that current user is following
             List<Long> following = followServiceClient.getFollowingIds(userId);
-            List<Long> followers = followServiceClient.getFollowerIds(userId);
-            
-            List<User> allUsers = userRepository.findAll();
-            
-            return allUsers.stream()
+
+            // Get all users and filter out:
+            // 1. The current user
+            // 2. Users that current user already follows
+            List<User> suggestedUsers = userRepository.findAll().stream()
                     .filter(u -> !u.getId().equals(userId))
                     .filter(u -> !following.contains(u.getId()))
-                    .map(u -> {
-                        int mutualCount = (int) followers.stream()
-                                .filter(followerId -> {
-                                    try {
-                                        List<Long> userFollowers = followServiceClient.getFollowerIds(u.getId());
-                                        return userFollowers.contains(followerId);
-                                    } catch (Exception e) {
-                                        return false;
-                                    }
-                                })
-                                .count();
-                        return new SuggestionDTO(u.getId(), u.getUsername(), u.getProfilePictureUrl(), mutualCount);
-                    })
-                    .sorted((a, b) -> Integer.compare(b.getMutualFollowers(), a.getMutualFollowers()))
                     .limit(limit)
                     .collect(Collectors.toList());
+
+            // Convert to SuggestionDTO
+            return suggestedUsers.stream()
+                    .map(u -> new SuggestionDTO(u.getId(), u.getUsername(), u.getProfilePictureUrl(), 0))
+                    .collect(Collectors.toList());
+
         } catch (Exception e) {
-            // If follow-service is unavailable, return random users not followed
+            // If follow-service is unavailable, return users not the current user
             List<User> randomUsers = userRepository.findAll();
-            try {
-                List<Long> following = followServiceClient.getFollowingIds(userId);
-                return randomUsers.stream()
-                        .filter(u -> !u.getId().equals(userId))
-                        .filter(u -> !following.contains(u.getId()))
-                        .limit(limit)
-                        .map(u -> new SuggestionDTO(u.getId(), u.getUsername(), u.getProfilePictureUrl(), 0))
-                        .collect(Collectors.toList());
-            } catch (Exception ex) {
-                return new ArrayList<>();
-            }
+            return randomUsers.stream()
+                    .filter(u -> !u.getId().equals(userId))
+                    .limit(limit)
+                    .map(u -> new SuggestionDTO(u.getId(), u.getUsername(), u.getProfilePictureUrl(), 0))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -155,7 +156,7 @@ public class UserService {
         response.setEmail(user.getEmail());
         response.setBio(user.getBio());
         response.setProfilePictureUrl(user.getProfilePictureUrl());
-        response.setPrivate(user.isPrivate());
+        response.setIsPrivate(user.isPrivate());
         response.setCreatedAt(user.getCreatedAt());
 
         return response;

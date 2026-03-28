@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "auth_users")
 public class User {
 
     @Id
@@ -21,9 +21,14 @@ public class User {
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-    
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+
+    @Column(name = "is_private", nullable = false, columnDefinition = "boolean default false")
+    private boolean isPrivate = false;
+
+    public User() {
+        this.isPrivate = false;
+    }
+
 
     public Long getId() {
         return id;
@@ -61,22 +66,19 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+
+    public boolean isPrivate() {
+        return isPrivate;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
-
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }
