@@ -21,7 +21,15 @@ public class User {
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-    
+
+    @Column(name = "is_private", nullable = false, columnDefinition = "boolean default false")
+    private boolean isPrivate = false;
+
+    public User() {
+        this.isPrivate = false;
+    }
+
+
     public Long getId() {
         return id;
     }
@@ -59,6 +67,14 @@ public class User {
     }
 
 
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

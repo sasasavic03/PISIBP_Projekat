@@ -113,4 +113,5 @@ gateway:
 logging:
   level:
     org.springframework.cloud.gateway: INFO
-    org.instagram.apigateway.filter: INFO
+    org.instagram.apigateway.filter: DEBUG
+    org.instagram.apigateway: DEBUG
