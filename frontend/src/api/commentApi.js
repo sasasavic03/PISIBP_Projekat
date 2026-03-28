@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/posts";
+const BASE_URL = "http://localhost:8080/api/comments";
 
 function getToken() {
   return localStorage.getItem("token");
@@ -12,10 +12,10 @@ function authHeaders() {
 }
 
 export async function addComment(postId, text) {
-  const response = await fetch(`${BASE_URL}/${postId}/comments`, {
+  const response = await fetch(`${BASE_URL}`, {
     method: "POST",
     headers: authHeaders(),
-    body: JSON.stringify({ text })
+    body: JSON.stringify({ postId, content: text })
   });
   if (!response.ok) throw new Error("Failed to add comment");
   return response.json();

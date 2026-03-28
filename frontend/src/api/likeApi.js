@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/posts";
+const BASE_URL = "http://localhost:8080/api/likes";
 
 function getToken() {
   return localStorage.getItem("token");
@@ -12,18 +12,20 @@ function authHeaders() {
 }
 
 export async function likePost(postId) {
-  const response = await fetch(`${BASE_URL}/${postId}/like`, {
+  const response = await fetch(`${BASE_URL}`, {
     method: "POST",
-    headers: authHeaders()
+    headers: authHeaders(),
+    body: JSON.stringify({ postId })
   });
   if (!response.ok) throw new Error("Failed to like post");
   return response.json();
 }
 
 export async function unlikePost(postId) {
-  const response = await fetch(`${BASE_URL}/${postId}/like`, {
+  const response = await fetch(`${BASE_URL}`, {
     method: "DELETE",
-    headers: authHeaders()
+    headers: authHeaders(),
+    body: JSON.stringify({ postId })
   });
   if (!response.ok) throw new Error("Failed to unlike post");
   return response.json();

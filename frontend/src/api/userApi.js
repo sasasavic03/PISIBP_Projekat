@@ -12,7 +12,7 @@ function authHeaders() {
 }
 
 export async function getUserProfile(username) {
-  const response = await fetch(`${BASE_URL}/${username}`, {
+  const response = await fetch(`${BASE_URL}/username/${username}`, {
     headers: authHeaders()
   });
   if (!response.ok) throw new Error("Failed to fetch profile");
@@ -20,7 +20,7 @@ export async function getUserProfile(username) {
 }
 
 export async function getUserStats(username) {
-  const response = await fetch(`${BASE_URL}/${username}/stats`, {
+  const response = await fetch(`${BASE_URL}/username/${username}/stats`, {
     headers: authHeaders()
   });
   if (!response.ok) throw new Error("Failed to fetch stats");
@@ -57,19 +57,25 @@ export async function getBlockedUsers(userId) {
   return response.json();
 }
 
-export async function blockUser(userId) {
-  const response = await fetch(`${BASE_URL}/${userId}/block`, {
+export async function blockUser(targetUserId) {
+  const response = await fetch(`${BASE_URL}/${targetUserId}/block`, {
     method: "POST",
-    headers: authHeaders()
+    headers: authHeaders(),
+    body: JSON.stringify({
+      blockedId: targetUserId
+    })
   });
   if (!response.ok) throw new Error("Failed to block user");
   return response.json();
 }
 
-export async function unblockUser(userId) {
-  const response = await fetch(`${BASE_URL}/${userId}/block`, {
+export async function unblockUser(targetUserId) {
+  const response = await fetch(`${BASE_URL}/${targetUserId}/block`, {
     method: "DELETE",
-    headers: authHeaders()
+    headers: authHeaders(),
+    body: JSON.stringify({
+      blockedId: targetUserId
+    })
   });
   if (!response.ok) throw new Error("Failed to unblock user");
   return response.json();

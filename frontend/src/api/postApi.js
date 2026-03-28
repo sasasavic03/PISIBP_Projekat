@@ -11,8 +11,8 @@ function authHeaders() {
   };
 }
 
-export async function getUserPosts(username) {
-  const response = await fetch(`${BASE_URL}/user/${username}`, {
+export async function getUserPosts(userId) {
+  const response = await fetch(`${BASE_URL}/user/${userId}`, {
     headers: authHeaders()
   });
   if (!response.ok) throw new Error("Failed to fetch posts");
@@ -21,7 +21,7 @@ export async function getUserPosts(username) {
 
 export async function createPost(files, description) {
   const formData = new FormData();
-  files.forEach(f => formData.append("files[]", f.file));
+  files.forEach(f => formData.append("files", f.file));
   formData.append("description", description);
   const response = await fetch(`${BASE_URL}`, {
     method: "POST",
@@ -42,7 +42,7 @@ export async function deletePost(postId) {
 }
 
 export async function deletePostMedia(postId, mediaIndex) {
-  const response = await fetch(`${BASE_URL}/${postId}/media/${mediaIndex}`, {
+  const response = await fetch(`${BASE_URL}/${postId}/media/index/${mediaIndex}`, {
     method: "DELETE",
     headers: authHeaders()
   });

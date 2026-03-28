@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/notifications";
+const BASE_URL = "http://localhost:8080/api/notification";
 
 function getToken() {
   return localStorage.getItem("token");
