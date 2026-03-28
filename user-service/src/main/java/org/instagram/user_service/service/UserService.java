@@ -14,6 +14,7 @@ import org.instagram.user_service.exception.UserNotFoundException;
 import org.instagram.user_service.repository.UserRepository;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -71,23 +72,9 @@ public class UserService {
             throw new InvalidUserDataException("Search query cannot be empty");
         }
 
-        // Search by username first
-        Page<User> usernameResults = userRepository.findByUsernameContainingIgnoreCase(query, pageable);
+        Page<User> results = userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query, pageable);
         
-        // If we have results, return them mapped
-        if (usernameResults.hasContent()) {
-            return usernameResults.map(user -> new UserSearchResultDTO(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getEmail(),
-                    user.getProfilePictureUrl(),
-                    user.isPrivate()
-            ));
-        }
-        
-        // Otherwise search by email
-        Page<User> emailResults = userRepository.findByEmailContainingIgnoreCase(query, pageable);
-        return emailResults.map(user -> new UserSearchResultDTO(
+        return results.map(user -> new UserSearchResultDTO(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -117,33 +104,28 @@ public class UserService {
     }
 
     public List<SuggestionDTO> getSuggestions(Long userId, int limit) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        // Verify user exists
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException("User not found");
+        }
 
         try {
-            // Get list of users that current user is following
             List<Long> following = followServiceClient.getFollowingIds(userId);
 
-            // Get all users and filter out:
-            // 1. The current user
-            // 2. Users that current user already follows
-            List<User> suggestedUsers = userRepository.findAll().stream()
-                    .filter(u -> !u.getId().equals(userId))
-                    .filter(u -> !following.contains(u.getId()))
-                    .limit(limit)
-                    .collect(Collectors.toList());
+
+            Pageable pageable = PageRequest.of(0, limit);
+            Page<User> suggestedUsers = userRepository.findByIdNotAndIdNotIn(userId, following, pageable);
 
             // Convert to SuggestionDTO
-            return suggestedUsers.stream()
+            return suggestedUsers.getContent().stream()
                     .map(u -> new SuggestionDTO(u.getId(), u.getUsername(), u.getProfilePictureUrl(), 0))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-            // If follow-service is unavailable, return users not the current user
-            List<User> randomUsers = userRepository.findAll();
-            return randomUsers.stream()
-                    .filter(u -> !u.getId().equals(userId))
-                    .limit(limit)
+
+            Pageable pageable = PageRequest.of(0, limit);
+            Page<User> randomUsers = userRepository.findByIdNotAndIdNotIn(userId, List.of(), pageable);
+            return randomUsers.getContent().stream()
                     .map(u -> new SuggestionDTO(u.getId(), u.getUsername(), u.getProfilePictureUrl(), 0))
                     .collect(Collectors.toList());
         }
