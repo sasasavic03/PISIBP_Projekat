@@ -59,11 +59,11 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long currentUserId,
-            @Valid @RequestBody UpdateProfileRequest request) {
-        UserResponse response = userService.updateUser(id, currentUserId, request);
-        return ResponseEntity.ok(response);
+        @PathVariable Long id,
+        @AuthenticationPrincipal Long currentUserId,
+        @RequestBody UpdateProfileRequest request) {
+
+    return ResponseEntity.ok(userService.updateUser(id, currentUserId, request));
     }
 
     @GetMapping("/{id}/suggestions")
@@ -75,7 +75,9 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal Long userId) {
+    public ResponseEntity<UserResponse> getMe(
+            @AuthenticationPrincipal Long userId) {
+    
         return ResponseEntity.ok(userService.getUser(userId));
-}
+    }
 }

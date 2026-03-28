@@ -50,6 +50,7 @@ public class AuthService {
 
         try {
             CreateUserRequest profileRequest = new CreateUserRequest();
+            profileRequest.setId(user.getId());
             profileRequest.setUsername(user.getUsername());
             profileRequest.setEmail(user.getEmail());
             userServiceClient.createUserProfile(profileRequest);
