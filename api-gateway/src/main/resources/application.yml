@@ -3,18 +3,13 @@ spring:
     name: api-gateway
   main:
     web-application-type: reactive
-  webflux:
-    multipart:
-      max-in-memory-size: 5242880
   cloud:
     gateway:
-      httpclient:
-        socket:
-          connect-timeout-millis: 5000
-      httpserver:
-        wiretap: false
       server:
         webflux:
+          httpclient:
+            connect-timeout: 5000
+            response-timeout: 10s
           routes:
             - id: auth-service
               uri: http://auth-service:8080
@@ -26,7 +21,7 @@ spring:
             - id: block-service-users
               uri: http://block-service:8080
               predicates:
-                - Path=/api/users/*/block,/api/users/*/blocked
+                - Path=/api/users/{userId}/block,/api/users/{userId}/blocked
               filters:
                 - RewritePath=/api/users(?<segment>/?.*), /api/users${segment}
 
@@ -68,7 +63,7 @@ spring:
             - id: feed-service
               uri: http://feed-service:8080
               predicates:
-                - Path=/api/feeds/**
+                - Path=/api/feeds/**,/api/feed/**
               filters:
                 - RewritePath=/api/feeds(?<segment>/?.*), /api/feed${segment}
 
@@ -97,14 +92,12 @@ jwt:
   algorithm: HS256
   issuer: instagram-auth-service
 
-# CORS Configuration
 cors:
   allowed-origins:
     - http://localhost:3000
     - http://localhost:5173
     - http://frontend:3000
 
-# Gateway Configuration - Public endpoints that do not require JWT authentication
 gateway:
   public-endpoints:
     - /api/auth/login
@@ -119,7 +112,5 @@ gateway:
 
 logging:
   level:
-    web: DEBUG
-    org.springframework.cloud.gateway: DEBUG
-    org.instagram.apigateway.filter: DEBUG
-    org.instagram.apigateway.util: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.instagram.apigateway.filter: INFO

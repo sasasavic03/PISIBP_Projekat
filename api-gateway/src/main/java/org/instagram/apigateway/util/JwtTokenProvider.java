@@ -35,7 +35,7 @@ public class JwtTokenProvider {
 
         try {
             // Single parse operation that validates signature and format
-            Jws<Claims> jws = getParser().parseClaimsJws(token);
+            Jws<Claims> jws = getParser().parseSignedClaims(token);
             Claims claims = jws.getBody();
             
             // Check expiration without parsing again
@@ -112,7 +112,7 @@ public class JwtTokenProvider {
     public Claims getClaimsFromToken(String token) {
         try {
             return getParser()
-                    .parseClaimsJws(token)
+                    .parseSignedClaims(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
             logger.debug("Token is expired, but claims extracted: {}", e.getMessage());
@@ -177,8 +177,8 @@ public class JwtTokenProvider {
     }
 
     private JwtParser getParser() {
-        return Jwts.parserBuilder()
-                .setSigningKey(signingKey)
+        return Jwts.parser()
+                .verifyWith((javax.crypto.SecretKey) signingKey)
                 .requireIssuer(jwtProperties.getIssuer())
                 .build();
     }
