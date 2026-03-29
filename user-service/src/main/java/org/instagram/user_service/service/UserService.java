@@ -102,6 +102,10 @@ public class UserService {
             user.setBio(request.getBio());
         }
 
+        if (request.getFullname() != null) {
+            user.setFullname(request.getFullname());
+        }
+
         if (request.getIsPrivate() != null) {
             user.setPrivate(request.getIsPrivate());
         }
@@ -143,6 +147,7 @@ public class UserService {
         response.setId(user.getId());
         response.setUsername(user.getUsername());
         response.setEmail(user.getEmail());
+        response.setFullname(user.getFullname());
         response.setBio(user.getBio());
         response.setProfilePictureUrl(user.getProfilePictureUrl());
         response.setIsPrivate(user.isPrivate());

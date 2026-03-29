@@ -2,6 +2,7 @@ package org.instagram.user_service.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UpdateProfileRequest {
     
@@ -10,6 +11,8 @@ public class UpdateProfileRequest {
 
     private Boolean isPrivate;
 
+    @Size(max = 150, message = "Full name must be less than 150 characters")
+    @JsonProperty("fullName")
     private String fullname;
 
     @Email(message = "Email should be valid")

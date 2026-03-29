@@ -23,6 +23,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    private String fullname;
     private String bio;
     private String profilePictureUrl;
     private boolean isPrivate;
@@ -48,6 +49,10 @@ public class User {
         return email;
     }
 
+    public String getFullname() {
+        return fullname;
+    }
+
     public String getBio() {
         return bio;
     }
@@ -70,6 +75,10 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     public void setBio(String bio) {
