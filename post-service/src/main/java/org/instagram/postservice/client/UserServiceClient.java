@@ -16,7 +16,7 @@ public class UserServiceClient {
 
     public UserResponse getUserDetails(Long userId) {
         try {
-            String url = userServiceUrl + "/api/users/" + userId;
+            String url = userServiceUrl + "/users/" + userId;
             return restTemplate.getForObject(url, UserResponse.class);
         } catch (Exception e) {
             // Log error and return basic user info

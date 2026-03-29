@@ -46,6 +46,11 @@ public class BlockController {
         return ResponseEntity.ok(blockService.getBlockedUsers(userId));
     }
 
+    @GetMapping("/{userId}/blocked-ids")
+    public ResponseEntity<List<Long>> getBlockedUserIds(@PathVariable Long userId){
+        return ResponseEntity.ok(blockService.getBlockedUserIds(userId));
+    }
+
     @GetMapping("/check")
     public ResponseEntity<Boolean> isBlocked(@RequestParam Long blockerId,
                                              @RequestParam Long blockedId){

@@ -76,5 +76,17 @@ public class FollowService {
                 ))
                 .toList();
     }
+
+    public boolean isFollowing(Long followerId, Long followingId) {
+        return repository.existsByFollowerIdAndFollowingIdAndStatus(followerId, followingId, FollowStatus.ACCEPTED);
+    }
+
+    public Long getFollowersCount(Long userId) {
+        return repository.countByFollowingIdAndStatus(userId, FollowStatus.ACCEPTED);
+    }
+
+    public Long getFollowingCount(Long userId) {
+        return repository.countByFollowerIdAndStatus(userId, FollowStatus.ACCEPTED);
+    }
 }
 

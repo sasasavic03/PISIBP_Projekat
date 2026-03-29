@@ -1,8 +1,9 @@
 package org.instagram.feedservice.service;
 
 import org.instagram.feedservice.dto.FeedPostDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 @Service
 public class FeedService {
 
+    private static final Logger logger = LoggerFactory.getLogger(FeedService.class);
+
     private final RestTemplate restTemplate;
 
     @Value("${follow.service.url:http://follow-service:8080}")
@@ -31,15 +34,20 @@ public class FeedService {
     @Value("${user.service.url:http://user-service:8080}")
     private String userServiceUrl;
 
+    @Value("${block.service.url:http://block-service:8080}")
+    private String blockServiceUrl;
+
     public FeedService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    @Cacheable(value = "userFeed", key = "#userId + '-' + #page + '-' + #size")
     public Map<String, Object> getUserFeedPaginated(Long userId, int page, int size) {
         try {
-            // Fetch all posts first
-            List<FeedPostDTO> allPosts = fetchAllUserFeedPosts(userId);
+            // Get following users
+            List<Long> followingUserIds = getFollowingUsers(userId);
+
+            // Fetch all posts from followed users
+            List<FeedPostDTO> allPosts = fetchPostsForUsers(followingUserIds);
 
             // Sort by creation date descending (newest first)
             List<FeedPostDTO> sortedPosts = allPosts.stream()
@@ -53,7 +61,9 @@ public class FeedService {
             int endIndex = Math.min(startIndex + size, totalItems);
 
             // Get page content
-            List<FeedPostDTO> pageContent = sortedPosts.subList(startIndex, endIndex);
+            List<FeedPostDTO> pageContent = startIndex < sortedPosts.size() 
+                    ? sortedPosts.subList(startIndex, endIndex) 
+                    : new ArrayList<>();
 
             // Build response
             Map<String, Object> response = new HashMap<>();
@@ -68,30 +78,54 @@ public class FeedService {
             return response;
 
         } catch (Exception e) {
+            logger.error("Failed to fetch user feed for userId {}: {}", userId, e.getMessage(), e);
             throw new RuntimeException("Failed to fetch user feed: " + e.getMessage(), e);
         }
     }
 
-    @Cacheable(value = "userFeedFull", key = "#userId")
     public List<FeedPostDTO> getUserFeed(Long userId) {
         try {
-            List<FeedPostDTO> allPosts = fetchAllUserFeedPosts(userId);
+            List<Long> followingUserIds = getFollowingUsers(userId);
 
-            // Sort by creation date descending (newest first)
-            return allPosts.stream()
+            if (followingUserIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // Fetch posts from followed users
+            String postsUrl = postServiceUrl + "/api/posts/feed";
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("userIds", followingUserIds);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody);
+
+            ResponseEntity<List<FeedPostDTO>> postsResponse = restTemplate.exchange(
+                    postsUrl,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<List<FeedPostDTO>>() {}
+            );
+
+            List<FeedPostDTO> posts = postsResponse.getBody();
+            if (posts == null) {
+                posts = new ArrayList<>();
+            }
+            List<FeedPostDTO> sortedPosts = posts.stream()
                     .sorted(Comparator.comparing(FeedPostDTO::getCreatedAt).reversed())
                     .collect(Collectors.toList());
 
+            logger.debug("Fetched {} posts for userId {}", sortedPosts.size(), userId);
+            return sortedPosts;
+
         } catch (Exception e) {
+            logger.error("Failed to fetch full user feed for userId {}: {}", userId, e.getMessage(), e);
             throw new RuntimeException("Failed to fetch user feed: " + e.getMessage(), e);
         }
     }
 
-    @Cacheable(value = "profileFeed", key = "#userId + '-' + #page + '-' + #size")
     public Map<String, Object> getUserProfileFeedPaginated(Long userId, int page, int size) {
         try {
-            // Fetch all user's posts
-            List<FeedPostDTO> allPosts = fetchUserProfilePosts(userId);
+            // Fetch all posts from post-service for this user
+            List<FeedPostDTO> allPosts = fetchPostsForUsers(new ArrayList<>(List.of(userId)));
 
             // Sort by creation date descending (newest first)
             List<FeedPostDTO> sortedPosts = allPosts.stream()
@@ -105,7 +139,9 @@ public class FeedService {
             int endIndex = Math.min(startIndex + size, totalItems);
 
             // Get page content
-            List<FeedPostDTO> pageContent = sortedPosts.subList(startIndex, endIndex);
+            List<FeedPostDTO> pageContent = startIndex < sortedPosts.size() 
+                    ? sortedPosts.subList(startIndex, endIndex) 
+                    : new ArrayList<>();
 
             // Build response
             Map<String, Object> response = new HashMap<>();
@@ -120,91 +156,41 @@ public class FeedService {
             return response;
 
         } catch (Exception e) {
+            logger.error("Failed to fetch user profile feed for userId {}: {}", userId, e.getMessage(), e);
             throw new RuntimeException("Failed to fetch user profile feed: " + e.getMessage(), e);
         }
     }
 
     public List<FeedPostDTO> getUserProfileFeed(Long userId) {
         try {
-            List<FeedPostDTO> allPosts = fetchUserProfilePosts(userId);
+            String postsUrl = postServiceUrl + "/api/posts/feed";
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("userIds", new ArrayList<>(List.of(userId)));
 
-            // Sort by creation date descending (newest first)
-            return allPosts.stream()
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody);
+
+            ResponseEntity<List<FeedPostDTO>> postsResponse = restTemplate.exchange(
+                    postsUrl,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<List<FeedPostDTO>>() {}
+            );
+
+            List<FeedPostDTO> posts = postsResponse.getBody();
+            if (posts == null) {
+                posts = new ArrayList<>();
+            }
+            List<FeedPostDTO> sortedPosts = posts.stream()
                     .sorted(Comparator.comparing(FeedPostDTO::getCreatedAt).reversed())
                     .collect(Collectors.toList());
 
+            logger.debug("Fetched {} profile posts for userId {}", sortedPosts.size(), userId);
+            return sortedPosts;
+
         } catch (Exception e) {
+            logger.error("Failed to fetch user profile feed for userId {}: {}", userId, e.getMessage(), e);
             throw new RuntimeException("Failed to fetch user profile feed: " + e.getMessage(), e);
         }
-    }
-
-    private List<FeedPostDTO> fetchAllUserFeedPosts(Long userId) {
-        // Fetch following list
-        String followingUrl = followServiceUrl + "/follow/" + userId + "/following";
-        ResponseEntity<List<Map<String, Object>>> followingResponse = restTemplate.exchange(
-                followingUrl,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
-        );
-
-        List<Map<String, Object>> followingData = followingResponse.getBody();
-
-        if (followingData == null || followingData.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // Extract followingId from each response
-        List<Long> followingUserIds = followingData.stream()
-                .map(item -> {
-                    Object followingId = item.get("followingId");
-                    if (followingId instanceof Number) {
-                        return ((Number) followingId).longValue();
-                    }
-                    return null;
-                })
-                .filter(java.util.Objects::nonNull)
-                .collect(Collectors.toList());
-
-        if (followingUserIds.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // Fetch posts from followed users
-        String postsUrl = postServiceUrl + "/api/posts/feed";
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("userIds", followingUserIds);
-
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody);
-
-        ResponseEntity<List<FeedPostDTO>> postsResponse = restTemplate.exchange(
-                postsUrl,
-                HttpMethod.POST,
-                request,
-                new ParameterizedTypeReference<List<FeedPostDTO>>() {}
-        );
-
-        List<FeedPostDTO> posts = postsResponse.getBody();
-        return posts != null ? posts : new ArrayList<>();
-    }
-
-    private List<FeedPostDTO> fetchUserProfilePosts(Long userId) {
-        // Fetch posts for a specific user
-        String postsUrl = postServiceUrl + "/api/posts/feed";
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("userIds", List.of(userId));
-
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody);
-
-        ResponseEntity<List<FeedPostDTO>> postsResponse = restTemplate.exchange(
-                postsUrl,
-                HttpMethod.POST,
-                request,
-                new ParameterizedTypeReference<List<FeedPostDTO>>() {}
-        );
-
-        List<FeedPostDTO> posts = postsResponse.getBody();
-        return posts != null ? posts : new ArrayList<>();
     }
 
     public Map<String, Object> getUserFeedPaginatedByUsername(String username, int page, int size) {
@@ -217,10 +203,105 @@ public class FeedService {
         return getUserFeed(userId);
     }
 
+    private List<Long> getFollowingUsers(Long userId) {
+        try {
+            String followingUrl = followServiceUrl + "/api/follow/" + userId + "/following";
+            ResponseEntity<List<Map<String, Object>>> followingResponse = restTemplate.exchange(
+                    followingUrl,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+            );
+
+            List<Map<String, Object>> followingData = followingResponse.getBody();
+
+            if (followingData == null || followingData.isEmpty()) {
+                logger.debug("No following data found for userId {}", userId);
+                return new ArrayList<>();
+            }
+
+            // Extract followingId from each response
+            List<Long> followingUserIds = followingData.stream()
+                    .map(item -> {
+                        Object followingId = item.get("followingId");
+                        if (followingId instanceof Number) {
+                            return ((Number) followingId).longValue();
+                        }
+                        return null;
+                    })
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            // Fetch blocked users and filter them out
+            List<Long> blockedIds = fetchBlockedUserIds(userId);
+            followingUserIds = followingUserIds.stream()
+                    .filter(id -> !blockedIds.contains(id))
+                    .collect(Collectors.toList());
+
+            logger.debug("User {} is following {} users (after blocking filter)", userId, followingUserIds.size());
+            return followingUserIds;
+
+        } catch (Exception e) {
+            logger.error("Error getting following list for user {}: {}", userId, e.getMessage(), e);
+            return new ArrayList<>();
+        }
+    }
+
+    private List<FeedPostDTO> fetchPostsForUsers(List<Long> userIds) {
+        try {
+            if (userIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            String postsUrl = postServiceUrl + "/api/posts/feed";
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("userIds", userIds);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody);
+
+            ResponseEntity<List<FeedPostDTO>> postsResponse = restTemplate.exchange(
+                    postsUrl,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<List<FeedPostDTO>>() {}
+            );
+
+            List<FeedPostDTO> posts = postsResponse.getBody();
+            logger.debug("Fetched {} posts for {} users", 
+                    posts != null ? posts.size() : 0, userIds.size());
+            return posts != null ? posts : new ArrayList<>();
+
+        } catch (Exception e) {
+            logger.error("Error fetching posts: {}", e.getMessage(), e);
+            return new ArrayList<>();
+        }
+    }
+
+
+    private List<Long> fetchBlockedUserIds(Long userId) {
+        try {
+            String url = blockServiceUrl + "/api/blocks/" + userId + "/blocked-ids";
+            ResponseEntity<List<Long>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Long>>() {}
+            );
+            List<Long> blocked = response.getBody();
+            logger.debug("Fetched {} blocked users for userId {}", 
+                    blocked != null ? blocked.size() : 0, userId);
+            return blocked != null ? blocked : new ArrayList<>();
+
+        } catch (Exception e) {
+            logger.warn("Could not fetch blocked users for {}, proceeding without filter: {}", 
+                    userId, e.getMessage());
+            return new ArrayList<>();
+        }
+    }
 
     private Long getUserIdByUsername(String username) {
         try {
-            String url = userServiceUrl + "/user/" + username;
+            String url = userServiceUrl + "/users/username/" + username;
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -235,8 +316,13 @@ public class FeedService {
                 }
             }
             throw new RuntimeException("User not found: " + username);
+
         } catch (Exception e) {
+            logger.error("Failed to fetch user ID for username {}: {}", username, e.getMessage(), e);
             throw new RuntimeException("Failed to fetch user ID for username: " + username, e);
         }
     }
 }
+
+
+

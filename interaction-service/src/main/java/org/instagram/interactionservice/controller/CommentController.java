@@ -120,6 +120,21 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/check")
+    public ResponseEntity<Map<String, Boolean>> checkUserComment(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam Long postId) {
+
+        List<Comment> comments = commentService.getPostComments(postId);
+        boolean hasCommented = comments.stream()
+                .anyMatch(c -> c.getUserId().equals(userId) && !c.getIsDeleted());
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("commented", hasCommented);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     private CommentResponseDto mapToDto(Comment comment) {
         return new CommentResponseDto(
