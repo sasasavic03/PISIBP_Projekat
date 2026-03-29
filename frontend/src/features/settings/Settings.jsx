@@ -108,7 +108,7 @@ export default function Settings() {
   async function handleUnblock(userId) {
     try {
       await unblockUser(userId);
-      setBlocked(blocked.filter(u => u.id !== userId));
+      setBlocked(blocked.filter(u => u.blockedId !== userId));
     } catch (err) {
       console.error("Failed to unblock:", err);
     }
@@ -211,7 +211,7 @@ export default function Settings() {
                 <li key={user.id} className="ig-settings-blocked-item">
                   <img src={user.avatar} alt={user.username} />
                   <span className="ig-settings-blocked-username">{user.username}</span>
-                  <button className="ig-settings-unblock-btn" onClick={() => handleUnblock(user.id)}>
+                  <button className="ig-settings-unblock-btn" onClick={() => handleUnblock(user.blockedId)}>
                     Unblock
                   </button>
                 </li>

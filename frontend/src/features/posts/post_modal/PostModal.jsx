@@ -19,6 +19,11 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
   const [showOptions, setShowOptions] = useState(false);
 
   const images = post.images ?? [post.image];
+  const mediaList = post.mediaList ?? [];
+
+  // odmah posle const mediaList = post.mediaList ?? [];
+  console.log("modal mediaList:", mediaList);
+  console.log("modal current media:", mediaList?.[currentIndex]);
 
   useEffect(() => {
     const checkLikeStatus = async () => {
@@ -99,7 +104,17 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
         {/* leva strana - slika */}
         <div className="ig-modal-image" onDoubleClick={doubleClickLike}>
 
+        {mediaList?.[currentIndex]?.mediaType === "VIDEO" ? (
+          <video
+            key={images[currentIndex]}
+            src={images[currentIndex]}
+            controls
+            /* autoPlay={false} */
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
+        ) : (
           <img src={images[currentIndex]} alt="post" />
+        )}
 
           {showHeart && <div className="ig-heart-animation">❤️</div>}
 

@@ -24,18 +24,25 @@ export default function PostsGrid({ username, isOwnProfile }) {
       try {
         const userProfile = await getUserProfile(username);
         const userId = userProfile.id;
+        
 
         const data = await getUserPosts(userId);
+        console.log("prvi post:", JSON.stringify(data[0], null, 2));
         const mapped = data.map(post => ({
           id: post.id,
-          image: post.media_list && post.media_list.length > 0
-              ? constructMediaUrl(post.media_list[0].media_url)
-              : null,
-          images: post.media_list?.map(m => constructMediaUrl(m.media_url)) || [],
-          likes: post.likes_count || 0,
+          image: `http://localhost:8080/api/posts/media/${post.media_list?.[0]?.media_url}`,
+          images: post.media_list.map(m => `http://localhost:8080/api/posts/media/${m.media_url}`),
+          mediaList: post.media_list.map(m => ({
+            mediaUrl: `http://localhost:8080/api/posts/media/${m.media_url}`,
+            mediaType: m.media_type,
+            orderIndex: m.order_index,
+          })),
+          likes: post.likes_count,
           likedBy: post.likedBy ?? [],
           comments: post.comments ?? [],
           content: post.description,
+          username: post.user?.username,
+          avatar: post.user?.profilePictureUrl,
         }));
         setPosts(mapped);
       } catch (err) {

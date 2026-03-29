@@ -10,6 +10,7 @@ export default function PostCard({
   author,
   avatar,
   images,
+  mediaList = [],
   likes: initialLikes,
   content,
   comments = [],
@@ -63,12 +64,18 @@ export default function PostCard({
   const postForModal = {
     id,
     images,
+    mediaList,
     username: author,
     avatar,
     content,
     likes,
     comments,
+    likedBy: initialLikedBy,
   };
+
+  // U PostCard.jsx, odmah pre return-a
+  console.log("mediaList:", mediaList);
+  console.log("current media:", mediaList?.[currentIndex]);
 
   return (
     <article className="ig-post_card">
@@ -81,7 +88,16 @@ export default function PostCard({
       </header>
 
       <div className="ig-post_media" onDoubleClick={doubleClickLike}>
-        <img src={images[currentIndex]} alt="post" />
+        {mediaList?.[currentIndex]?.mediaType === "VIDEO" ? (
+          <video
+            key={images[currentIndex]}
+            src={images[currentIndex]}
+            controls
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
+        ) : (
+          <img src={images[currentIndex]} alt="post" />
+        )}
 
         {showHeart && <div className="ig-heart-animation">❤️</div>}
 
@@ -100,6 +116,8 @@ export default function PostCard({
           </>
         )}
       </div>
+
+
 
       {images.length > 1 && (
         <div className="ig-carousel_dots">

@@ -26,6 +26,7 @@ export default function PostList() {
           avatar: post.authorAvatar,
           content: post.description,
           images: post.mediaList.map(m => m.mediaUrl),
+          mediaList: post.mediaList,
           likes: post.likesCount,
           likedBy: post.likedBy ?? [],
           comments: post.comments ?? [],
@@ -53,6 +54,7 @@ export default function PostList() {
         <PostCard
           key={post.id}
           id={post.id} 
+          mediaList={post.mediaList} 
           author={post.author}
           content={post.content}
           avatar={post.avatar}
