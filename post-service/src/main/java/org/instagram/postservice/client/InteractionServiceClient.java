@@ -17,7 +17,7 @@ public class InteractionServiceClient {
 
     public Long getLikeCount(Long postId) {
         try {
-            String url = interactionServiceUrl + "/likes/post/" + postId + "/count";
+            String url = interactionServiceUrl + "/api/likes/post/" + postId + "/count";
             CountResponse response = restTemplate.getForObject(url, CountResponse.class);
             return response != null ? response.getCount() : 0L;
         } catch (Exception e) {
@@ -29,7 +29,7 @@ public class InteractionServiceClient {
 
     public Long getCommentCount(Long postId) {
         try {
-            String url = interactionServiceUrl + "/comments/post/" + postId + "/count";
+            String url = interactionServiceUrl + "/api/comments/post/" + postId + "/count";
             CountResponse response = restTemplate.getForObject(url, CountResponse.class);
             return response != null ? response.getCount() : 0L;
         } catch (Exception e) {

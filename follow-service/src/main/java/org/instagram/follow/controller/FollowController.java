@@ -29,16 +29,19 @@ public class FollowController {
     }
 
     @PostMapping("/{targetUserId}")
-    public ResponseEntity<Map<String, String>> follow(@PathVariable Long targetUserId,
-                                       @RequestBody FollowRequestDto request){
-        service.follow(request.getFollowerId(),targetUserId, request.isPrivate());
+    public ResponseEntity<Map<String, String>> follow(
+            @PathVariable Long targetUserId,
+            @RequestHeader("X-User-Id") Long followerId,
+            @RequestBody FollowRequestDto request){
+        service.follow(followerId, targetUserId, request.isPrivate());
         return ResponseEntity.ok(Map.of("message", "Successfully followed user"));
     }
 
     @DeleteMapping("/{targetUserId}")
-    public ResponseEntity<Map<String, String>> unfollow(@PathVariable Long targetUserId,
-                                         @RequestBody FollowRequestDto request){
-        service.unfollow(request.getFollowerId(),targetUserId);
+    public ResponseEntity<Map<String, String>> unfollow(
+            @PathVariable Long targetUserId,
+            @RequestHeader("X-User-Id") Long followerId){
+        service.unfollow(followerId, targetUserId);
         return ResponseEntity.ok(Map.of("message", "Successfully unfollowed user"));
     }
 
@@ -50,5 +53,25 @@ public class FollowController {
     @GetMapping("/{userId}/following")
     public ResponseEntity<List<FollowResponseDto>> getFollowing(@PathVariable Long userId){
         return ResponseEntity.ok(service.getFollowing(userId));
+    }
+
+    @GetMapping("/{userId}/followers/count")
+    public ResponseEntity<Map<String, Long>> getFollowersCount(@PathVariable Long userId){
+        Long count = service.getFollowersCount(userId);
+        return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    @GetMapping("/{userId}/following/count")
+    public ResponseEntity<Map<String, Long>> getFollowingCount(@PathVariable Long userId){
+        Long count = service.getFollowingCount(userId);
+        return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<Map<String, Boolean>> isFollowing(
+            @RequestHeader("X-User-Id") Long followerId,
+            @RequestParam Long followingId) {
+        boolean following = service.isFollowing(followerId, followingId);
+        return ResponseEntity.ok(Map.of("following", following));
     }
 }

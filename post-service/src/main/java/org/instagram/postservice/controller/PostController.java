@@ -124,7 +124,21 @@ public class PostController {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }
-    
+
+    @GetMapping("/user/{userId}/count")
+    public ResponseEntity<?> getUserPostsCount(@PathVariable Long userId) {
+        try {
+            long count = postRepository.countByUserIdAndIsActiveTrue(userId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("count", count);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error counting user posts for userId " + userId + ": " + e.getMessage());
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
     @PostMapping("/feed")
     public ResponseEntity<?> getPostsByUserIds(@RequestBody Map<String, Object> request) {
         try {

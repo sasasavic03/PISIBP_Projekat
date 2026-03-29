@@ -2,7 +2,10 @@ package org.instagram.user_service.controller;
 
 import org.instagram.user_service.client.BlockServiceClient;
 import org.instagram.user_service.client.FollowServiceClient;
+import org.instagram.user_service.client.PostServiceClient;
 import org.instagram.user_service.dto.CreateUserRequest;
+import org.instagram.user_service.dto.FollowCountResponse;
+import org.instagram.user_service.dto.PostCountResponse;
 import org.instagram.user_service.dto.SuggestionDTO;
 import org.instagram.user_service.dto.UpdateProfileRequest;
 import org.instagram.user_service.dto.UpdatePrivacyRequest;
@@ -29,11 +32,13 @@ public class UserController {
     private final UserService userService;
     private final BlockServiceClient blockServiceClient;
     private final FollowServiceClient followServiceClient;
+    private final PostServiceClient postServiceClient;
 
-    public UserController(UserService userService, BlockServiceClient blockServiceClient, FollowServiceClient followServiceClient) {
+    public UserController(UserService userService, BlockServiceClient blockServiceClient, FollowServiceClient followServiceClient, PostServiceClient postServiceClient) {
         this.userService = userService;
         this.blockServiceClient = blockServiceClient;
         this.followServiceClient = followServiceClient;
+        this.postServiceClient = postServiceClient;
     }
 
     @PostMapping
@@ -101,14 +106,31 @@ public class UserController {
         stats.put("username", user.getUsername());
         stats.put("bio", user.getBio());
         stats.put("profilePictureUrl", user.getProfilePictureUrl());
-        stats.put("postsCount", 0);
+
+        try {
+            PostCountResponse postCountResponse = postServiceClient.getUserPostsCount(user.getId());
+            Long postsCount = (postCountResponse != null && postCountResponse.getCount() != null) 
+                ? postCountResponse.getCount() 
+                : 0;
+            stats.put("postsCount", postsCount);
+        } catch (Exception e) {
+            stats.put("postsCount", 0);
+        }
 
         // Fetch follower and following counts from follow-service
         try {
-            Long followersCount = followServiceClient.getFollowersCount(user.getId());
-            Long followingCount = followServiceClient.getFollowingCount(user.getId());
-            stats.put("followersCount", followersCount != null ? followersCount : 0);
-            stats.put("followingCount", followingCount != null ? followingCount : 0);
+            FollowCountResponse followersResp = followServiceClient.getFollowersCount(user.getId());
+            FollowCountResponse followingResp = followServiceClient.getFollowingCount(user.getId());
+            
+            Long followersCount = (followersResp != null && followersResp.getCount() != null)
+                ? followersResp.getCount() 
+                : 0;
+            Long followingCount = (followingResp != null && followingResp.getCount() != null) 
+                ? followingResp.getCount() 
+                : 0;
+            
+            stats.put("followersCount", followersCount);
+            stats.put("followingCount", followingCount);
         } catch (Exception e) {
             stats.put("followersCount", 0);
             stats.put("followingCount", 0);

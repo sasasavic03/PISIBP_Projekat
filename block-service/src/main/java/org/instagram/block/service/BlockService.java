@@ -49,4 +49,11 @@ public class BlockService {
                 ))
                 .toList();
     }
+
+    public List<Long> getBlockedUserIds(Long blockerId) {
+        return blockRepository.findByBlockerId(blockerId)
+                .stream()
+                .map(Block::getBlockedId)
+                .toList();
+    }
 }
