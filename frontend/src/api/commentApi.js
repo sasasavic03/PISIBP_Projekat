@@ -20,3 +20,12 @@ export async function addComment(postId, text) {
   if (!response.ok) throw new Error("Failed to add comment");
   return response.json();
 }
+
+export async function checkComment(postId) {
+  const response = await fetch(`${BASE_URL}/check?postId=${postId}`, {
+    method: "GET",
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to check comment status");
+  return response.json();
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./settings.css";
-import { updateUserSettings, updateAvatar, getBlockedUsers, unblockUser, updatePrivacy } from "../../api/userApi";
+import { updateUserSettings, updateAvatar, getBlockedUsers, unblockUser, updatePrivacy, getUserProfile } from "../../api/userApi";
 
 export default function Settings() {
 
@@ -22,17 +22,36 @@ export default function Settings() {
   const [blocked, setBlocked] = useState([]);
   const [isPrivate, setIsPrivate] = useState(false);
 
+
   useEffect(() => {
-    async function fetchBlocked() {
+    async function fetchData() {
       try {
-        const data = await getBlockedUsers(loggedUserId);
-        setBlocked(data);
+        const [blockedData, profileData] = await Promise.all([
+          getBlockedUsers(loggedUserId),
+          getUserProfile(localStorage.getItem("username")),
+        ]);
+        setBlocked(blockedData);
+        setIsPrivate(profileData.isPrivate ?? false);
+
+        setPreview(profileData.avatar || "");
+        
+        setForm(prev => ({
+          ...prev,
+          username: profileData.username || prev.username,
+          fullName: profileData.fullName || "",
+          email: profileData.email || "",
+          bio: profileData.bio || "",
+        }));
+
+
       } catch (err) {
-        console.error("Failed to fetch blocked users:", err);
+        console.error("Failed to fetch data:", err);
       }
     }
-    fetchBlocked();
+    fetchData();
   }, []);
+
+
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
