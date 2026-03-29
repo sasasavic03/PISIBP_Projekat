@@ -30,3 +30,12 @@ export async function unlikePost(postId) {
   if (!response.ok) throw new Error("Failed to unlike post");
   return response.json();
 }
+
+export async function checkLike(postId) {
+  const response = await fetch(`${BASE_URL}/check?postId=${postId}`, {
+    method: "GET",
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to check like status");
+  return response.json();
+}

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./postmodal.css";
 import { FiHeart, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import LikedByModal from "../likedby_modal/LikeByModal";
 import { Link } from "react-router-dom";
-import { likePost, unlikePost } from "../../../api/likeApi";
-import { addComment } from "../../../api/commentApi";
+import { likePost, unlikePost, checkLike } from "../../../api/likeApi";
+import { addComment, checkComment  } from "../../../api/commentApi";
 
 export default function PostModal({ post, onClose, isOwner, onDeletePost, onDeleteImage }) {
 
@@ -19,6 +19,18 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
   const [showOptions, setShowOptions] = useState(false);
 
   const images = post.images ?? [post.image];
+
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      try {
+        const data = await checkLike(post.id);
+        setLiked(data.liked);
+      } catch (err) {
+        console.error("Failed to check like status:", err);
+      }
+    };
+    checkLikeStatus();
+  }, [post.id]);
 
   function nextImage() {
     setCurrentIndex((prev) => prev === images.length - 1 ? prev : prev + 1);
@@ -73,7 +85,7 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
     if (!newComment.trim()) return;
     try {
       const data = await addComment(post.id, newComment);
-      setComments([...comments, data]);
+      setComments([...comments, data.comment]);
       setNewComment("");
     } catch (err) {
       console.error("Failed to add comment:", err);

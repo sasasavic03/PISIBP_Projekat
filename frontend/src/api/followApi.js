@@ -12,12 +12,10 @@ function authHeaders() {
 }
 
 export async function followUser(targetUserId, isPrivate = false) {
-  const followerId = localStorage.getItem("userId");
   const response = await fetch(`${BASE_URL}/${targetUserId}`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({
-      followerId: followerId,
       private: isPrivate
     })
   });
@@ -26,13 +24,9 @@ export async function followUser(targetUserId, isPrivate = false) {
 }
 
 export async function unfollowUser(targetUserId) {
-  const followerId = localStorage.getItem("userId");
   const response = await fetch(`${BASE_URL}/${targetUserId}`, {
     method: "DELETE",
     headers: authHeaders(),
-    body: JSON.stringify({
-      followerId: followerId
-    })
   });
   if (!response.ok) throw new Error("Failed to unfollow user");
   return response.json();
@@ -51,5 +45,24 @@ export async function getFollowing(userId) {
     headers: authHeaders()
   });
   if (!response.ok) throw new Error("Failed to fetch following");
+  return response.json();
+}
+
+export async function checkFollow(followingId) {
+  const response = await fetch(`${BASE_URL}/check?followingId=${followingId}`, {
+    method: "GET",
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to check follow status");
+  return response.json();
+}
+
+/* potencijalno nepotrebno */
+export async function checkComment(postId) {
+  const response = await fetch(`${BASE_URL}/check?postId=${postId}`, {
+    method: "GET",
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to check comment status");
   return response.json();
 }

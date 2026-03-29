@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./profileheader.css";
 import FollowersModal from "./followersmodal/FollowersModal";
 import ProfileOptionsModal from "./profile_options_modal/ProfileOptionsModal";
-import { followUser, unfollowUser } from "../../api/followApi";
+import { followUser, unfollowUser, checkFollow } from "../../api/followApi";
 
 export default function ProfileHeader({ user, stats, isOwnProfile }) {
 
@@ -11,6 +11,24 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
   const [followed, setFollowed] = useState(false);
   const [requested, setRequested] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+
+  const currentUserId = parseInt(localStorage.getItem("userId")) || null;
+
+  
+  useEffect(() => {
+    if (!isOwnProfile && user?.id) {
+      const checkFollowStatus = async () => {
+        try {
+          const data = await checkFollow(user.id);
+          setFollowed(data.following || false);
+        } catch (err) {
+          console.error("Failed to check follow status:", err);
+        }
+      };
+      checkFollowStatus();
+    }
+  }, [user?.id, isOwnProfile]);
+
 
   async function handleFollow() {
     try {
