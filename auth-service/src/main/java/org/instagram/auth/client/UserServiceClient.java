@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface UserServiceClient {
 
     @PostMapping("/users")
-    void createUserProfile(@RequestBody CreateUserRequest request);
+    UserProfileResponse createUserProfile(@RequestBody CreateUserRequest request);
 
     @GetMapping("/users/username/{username}")
     UserProfileResponse getUserByUsername(@PathVariable("username") String username);

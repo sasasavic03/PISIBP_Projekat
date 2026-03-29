@@ -54,21 +54,21 @@ public class AuthService {
 
         userRepository.save(user);
 
+        Long userProfileId;
         try {
             CreateUserRequest profileRequest = new CreateUserRequest();
-            profileRequest.setId(user.getId());
             profileRequest.setUsername(user.getUsername());
             profileRequest.setEmail(user.getEmail());
-            userServiceClient.createUserProfile(profileRequest);
+            UserProfileResponse profileResponse = userServiceClient.createUserProfile(profileRequest);
+            userProfileId = profileResponse.getId();
         } catch (Exception e) {
             logger.error("Failed to create user profile in user-service for user: {}", user.getUsername(), e);
             throw new RuntimeException("Registration failed - could not create user profile");
         }
 
-        Long canonicalUserId = resolveCanonicalUserId(user);
-        String token = jwtService.generateToken(user.getUsername(), canonicalUserId);
+        String token = jwtService.generateToken(user.getUsername(), userProfileId);
 
-        return new AuthResponse(token, canonicalUserId, user.getUsername(), null);
+        return new AuthResponse(token, userProfileId, user.getUsername(), null);
     }
 
     public AuthResponse login(LoginRequest request) {
