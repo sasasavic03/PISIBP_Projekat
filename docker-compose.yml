@@ -119,6 +119,8 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-posts}
       MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      SERVICES_USER_URL: http://user-service:8080
+      SERVICES_INTERACTION_URL: http://interaction-service:8080
     networks:
       - instagram-network
 
@@ -133,6 +135,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/instagram
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      FOLLOW_SERVICE_URL: http://follow-service:8080
+      POST_SERVICE_URL: http://post-service:8080
+      USER_SERVICE_URL: http://user-service:8080
+      BLOCK_SERVICE_URL: http://block-service:8080
     networks:
       - instagram-network
 
