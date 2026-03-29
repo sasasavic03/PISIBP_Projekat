@@ -1,12 +1,15 @@
 package org.instagram.user_service.dto;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserResponse {
 
     private Long id;
     private String username;
     private String email;
+    @JsonProperty("fullName")
+    private String fullname;
     private String bio;
     private String profilePictureUrl;
     private boolean isPrivate;
@@ -24,11 +27,19 @@ public class UserResponse {
         return email;
     }
 
+    public String getFullname() {
+        return fullname;
+    }
+
     public String getBio() {
         return bio;
     }
 
     public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public String getAvatar() {
         return profilePictureUrl;
     }
 
@@ -50,6 +61,10 @@ public class UserResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     public void setBio(String bio) {

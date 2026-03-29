@@ -97,8 +97,11 @@ public class UserController {
         Map<String, Object> stats = new HashMap<>();
         stats.put("userId", user.getId());
         stats.put("username", user.getUsername());
+        stats.put("email", user.getEmail());
+        stats.put("fullname", user.getFullname());
         stats.put("bio", user.getBio());
         stats.put("profilePictureUrl", user.getProfilePictureUrl());
+        stats.put("isPrivate", user.getIsPrivate());
 
         try {
             PostCountResponse postCountResponse = postServiceClient.getUserPostsCount(user.getId());
