@@ -51,6 +51,14 @@ public class FollowService {
         repository.delete(follow);
     }
 
+    @Transactional
+    public void acceptFollow(Long followerId, Long followingId) {
+        Follow follow = repository.findByFollowerIdAndFollowingId(followerId, followingId)
+                .orElseThrow(() -> new RuntimeException("Follow not found"));
+        follow.setStatus(FollowStatus.ACCEPTED);
+        repository.save(follow);
+    }
+
     public List<FollowResponseDto> getFollowers(Long userId){
         return repository.findByFollowingIdAndStatus(userId,FollowStatus.ACCEPTED)
                 .stream()
@@ -87,6 +95,12 @@ public class FollowService {
 
     public Long getFollowingCount(Long userId) {
         return repository.countByFollowerIdAndStatus(userId, FollowStatus.ACCEPTED);
+    }
+
+    public String getFollowStatus(Long followerId, Long followingId) {
+        return repository.findByFollowerIdAndFollowingId(followerId,followingId)
+                .map(f->f.getStatus() == FollowStatus.ACCEPTED ? "following" : "requested")
+                .orElse("none");
     }
 }
 

@@ -26,12 +26,13 @@ public class NotificationClient {
                     "type", type
             );
             restTemplate.postForObject(
-                    notificationServiceUrl + "/api/notifications",
+                    notificationServiceUrl + "/api/notification",
                     request,
                     Void.class
             );
+            System.out.println("Notification sent successfully to " + notificationServiceUrl);
         } catch (Exception e){
-            //ako se ne posalje notifikacija ne blokiramo follow
+            System.out.println("Failed to send notification: " + e.getMessage());
         }
     }
 }

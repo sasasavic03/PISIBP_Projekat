@@ -1,5 +1,7 @@
 package org.instagram.notification.service;
 
+import org.instagram.notification.client.FollowServiceClient;
+import org.instagram.notification.client.UserServiceClient;
 import org.instagram.notification.dto.NotificationRequestDto;
 import org.instagram.notification.dto.NotificationResponseDto;
 import org.instagram.notification.model.Notification;
@@ -13,9 +15,15 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final UserServiceClient userServiceClient;
+    private final FollowServiceClient followServiceClient;
 
-    public NotificationService(NotificationRepository notificationRepository) {
+    public NotificationService(NotificationRepository notificationRepository,
+                               UserServiceClient userServiceClient,
+                               FollowServiceClient followServiceClient) {
         this.notificationRepository = notificationRepository;
+        this.userServiceClient = userServiceClient;
+        this.followServiceClient = followServiceClient;
     }
 
     public void createNotification(NotificationRequestDto request){
@@ -28,16 +36,24 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public List<NotificationResponseDto> getNotifications(Long recipientId){
+    public List<NotificationResponseDto> getNotifications(Long recipientId) {
         return notificationRepository.findByRecipientIdOrderByCreatedAtDesc(recipientId)
                 .stream()
-                .map(n -> new NotificationResponseDto(
-                        n.getId(),
-                        n.getType(),
-                        n.getSenderId(),
-                        n.getIsRead(),
-                        n.getCreatedAt()
-                ))
+                .map(n -> {
+                    NotificationResponseDto dto = new NotificationResponseDto(
+                            n.getId(),
+                            n.getType(),
+                            n.getSenderId(),
+                            n.getIsRead(),
+                            n.getCreatedAt()
+                    );
+                    UserServiceClient.UserResponse user = userServiceClient.getUserById(n.getSenderId());
+                    if (user != null) {
+                        dto.setUsername(user.getUsername());
+                        dto.setAvatar(user.getAvatar());
+                    }
+                    return dto;
+                })
                 .toList();
     }
 
@@ -66,9 +82,12 @@ public class NotificationService {
         notificationRepository.saveAll(notifications);
     }
 
-    public void acceptFollowRequest(Long notificationId){
+    public void acceptFollowRequest(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        followServiceClient.acceptFollow(notification.getSenderId(), notification.getRecipientId());
+
         notification.setRead(true);
         notificationRepository.save(notification);
     }
