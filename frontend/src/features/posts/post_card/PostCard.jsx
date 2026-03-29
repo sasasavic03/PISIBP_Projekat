@@ -14,11 +14,12 @@ export default function PostCard({
   likes: initialLikes,
   content,
   comments = [],
-  likedBy: initialLikedBy = []
+  likedBy: initialLikedBy = [],
+  initialLiked = false,
 }) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(initialLiked);
   const [likes, setLikes] = useState(initialLikes);
   const [showModal, setShowModal] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
@@ -73,9 +74,7 @@ export default function PostCard({
     likedBy: initialLikedBy,
   };
 
-  // U PostCard.jsx, odmah pre return-a
-  console.log("mediaList:", mediaList);
-  console.log("current media:", mediaList?.[currentIndex]);
+  
 
   return (
     <article className="ig-post_card">
@@ -94,9 +93,14 @@ export default function PostCard({
             src={images[currentIndex]}
             controls
             style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            onError={(e) => console.error("Video failed to load:", images[currentIndex], e)}
           />
         ) : (
-          <img src={images[currentIndex]} alt="post" />
+          <img src={images[currentIndex]} 
+          alt="post" 
+          onError={(e) => console.error("Image failed to load:", images[currentIndex], e)}
+          onLoad={() => console.log("Image loaded successfully:", images[currentIndex])}
+          />
         )}
 
         {showHeart && <div className="ig-heart-animation">❤️</div>}

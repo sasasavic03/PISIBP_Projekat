@@ -24,12 +24,17 @@
 .ig-profile-avatar img{
     width:150px;
     height:150px;
-
     border-radius:50%;
     object-fit:cover;
-
     border:1px solid var(--ig-border);
+    display: block;
 }
+
+.ig-profile-avatar {
+  flex-shrink: 0;
+}
+
+
 
 /* right side */
 

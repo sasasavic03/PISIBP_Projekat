@@ -21,9 +21,7 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
   const images = post.images ?? [post.image];
   const mediaList = post.mediaList ?? [];
 
-  // odmah posle const mediaList = post.mediaList ?? [];
-  console.log("modal mediaList:", mediaList);
-  console.log("modal current media:", mediaList?.[currentIndex]);
+ 
 
   useEffect(() => {
     const checkLikeStatus = async () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./post_list.css";
 import PostCard from "../post_card/PostCard";
 import { getUserFeed } from "../../../api/feedApi";
+import { checkLike } from "../../../api/likeApi";
 
 export default function PostList() {
 
@@ -17,19 +18,77 @@ export default function PostList() {
       setError(null);
 
       try {
-        const data = await getUserFeed(userId);
+          const data = await getUserFeed(userId);
         
         
-        const mapped = data.map(post => ({
-          id: post.id,
-          author: post.authorUsername,
-          avatar: post.authorAvatar,
-          content: post.description,
-          images: post.mediaList.map(m => m.mediaUrl),
-          mediaList: post.mediaList,
-          likes: post.likesCount,
-          likedBy: post.likedBy ?? [],
-          comments: post.comments ?? [],
+                
+                const postsData = Array.isArray(data) ? data : (data && data.content) ? data.content : [];
+
+                if (!postsData || postsData.length === 0) {
+                  setPosts([]);
+                  console.log("No posts in response");
+                  return;
+                }
+        
+                console.log("Total posts to process:", postsData.length);
+                console.log("First post raw data:", JSON.stringify(postsData[0], null, 2));
+        
+                const mapped = await Promise.all(postsData.map(async (post) => {
+                  console.log("=== Processing post ===", post.id);
+        
+                  const author = post.user?.username || 'Unknown User';
+                  const avatar = post.user?.profile_picture_url || post.user?.profilePictureUrl || '/default-avatar.jpg';
+        
+                  let images = [];
+                  let mediaList = [];
+                  if (post.media_list && Array.isArray(post.media_list)) {
+                    console.log("Post has media_list with", post.media_list.length, "items");
+                    console.log("First media item:", post.media_list[0]);
+        
+                    images = post.media_list.map((m, idx) => {
+
+                      const mediaUrl = m.media_url || m.mediaUrl;
+                      if (!mediaUrl) {
+                        console.warn("Media item missing media_url/mediaUrl:", m);
+                        return "";
+                      }
+                      const fullUrl = `http://localhost:8080/api/posts/media/${mediaUrl}`;
+                      console.log(`Image ${idx}: "${mediaUrl}" -> "${fullUrl}"`);
+                      return fullUrl;
+                    });
+        
+                    console.log("Final images array:", images);
+        
+                    mediaList = post.media_list.map(m => ({
+                      mediaUrl: `http://localhost:8080/api/posts/media/${m.media_url || m.mediaUrl}`,
+                      mediaType: m.media_type || m.mediaType,
+                      orderIndex: m.order_index || m.orderIndex,
+                    }));
+                  } else {
+                    console.warn("Post has no media_list or it's not an array", { media_list: post.media_list });
+                  }
+        
+                  let isLiked = false;
+                  try {
+                    const likeData = await checkLike(post.id);
+                    isLiked = likeData.liked || false;
+                  } catch (err) {
+                    console.warn("Failed to check like status for post " + post.id, err);
+                  }
+        
+                  return {
+                    id: post.id,
+                    author: author,
+                    avatar: avatar,
+                    content: post.description || '',
+                    images: images,
+                    mediaList: mediaList,
+                    likes: post.likes_count || 0,
+                    liked: isLiked,
+                    likedBy: [],
+                    comments: [],
+                  };
+                
         }));
 
         setPosts(mapped);
@@ -62,6 +121,7 @@ export default function PostList() {
           likes={post.likes}
           comments={post.comments}
           likedBy={post.likedBy}
+          initialLiked={post.liked}
         />
       ))}
     </div>

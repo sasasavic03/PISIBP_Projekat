@@ -27,7 +27,7 @@ export default function PostsGrid({ username, isOwnProfile }) {
         
 
         const data = await getUserPosts(userId);
-        console.log("prvi post:", JSON.stringify(data[0], null, 2));
+        
         const mapped = data.map(post => ({
           id: post.id,
           image: `http://localhost:8080/api/posts/media/${post.media_list?.[0]?.media_url}`,
@@ -125,7 +125,15 @@ export default function PostsGrid({ username, isOwnProfile }) {
             className="ig-post-item"
             onClick={() => setSelectedPost(post)}
           >
+        {post.mediaList?.[0]?.mediaType === "VIDEO" ? (
+              <video
+                src={post.image}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                preload="metadata"
+              />
+            ) : (        
             <img src={post.image} alt="post" />
+            )}
             <div className="ig-post-overlay">
               <span><FiHeart fill="white" /> {post.likes}</span>
               <span><FiMessageSquare fill="white" /> {post.comments.length}</span>

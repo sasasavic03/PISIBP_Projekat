@@ -21,13 +21,14 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
         try {
           const data = await checkFollow(user.id);
           setFollowed(data.following || false);
+          setRequested(data.requested || false);
         } catch (err) {
           console.error("Failed to check follow status:", err);
         }
       };
       checkFollowStatus();
     }
-  }, [user?.id, isOwnProfile]);
+  }, [user, isOwnProfile]);
 
 
   async function handleFollow() {
@@ -37,7 +38,7 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
         setFollowed(false);
         setRequested(false);
       } else if (user?.isPrivate && !requested) {
-        const data = await followUser(user.id);
+        const data = await followUser(user.id, user.isPrivate);
         if (data.status === "requested") {
           setRequested(true);
         } else {
