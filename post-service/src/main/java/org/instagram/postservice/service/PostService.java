@@ -12,10 +12,15 @@ import org.instagram.postservice.exception.UnauthorizedException;
 import org.instagram.postservice.repository.MediaRepository;
 import org.instagram.postservice.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 
 @Service
@@ -91,15 +96,68 @@ public class PostService {
     }
 
 
+    @Transactional
     public List<Post> getUserPosts(Long userId) {
-        return postRepository.findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(userId);
+        List<Post> posts = postRepository.findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(userId);
+        // Explicitly initialize media collections while in transaction
+        for (Post post : posts) {
+            if (post.getMediaList() != null) {
+                post.getMediaList().forEach(m -> {
+                    m.getId(); // Access all fields to force load
+                    m.getMediaUrl();
+                    m.getMediaType();
+                    m.getOrderIndex();
+                });
+            }
+        }
+        return posts;
     }
     
+    @Transactional
     public List<Post> getPostsByUserIds(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return List.of();
         }
-        return postRepository.findByUserIdInAndIsActiveTrueOrderByCreatedAtDesc(userIds);
+        List<Post> posts = postRepository.findByUserIdInWithMediaAndIsActiveTrueOrderByCreatedAtDesc(userIds);
+        // Explicitly initialize all media fields while in transaction context
+        for (Post post : posts) {
+            if (post.getMediaList() != null) {
+                post.getMediaList().forEach(m -> {
+                    m.getId(); // Force load all fields
+                    m.getMediaUrl();
+                    m.getMediaType();
+                    m.getOrderIndex();
+                    m.getCreatedAt();
+                });
+            }
+        }
+        return posts;
+    }
+
+    public Map<String, Object> getPostsByUserIdsPaginated(List<Long> userIds, int page, int size) {
+        if (userIds == null || userIds.isEmpty()) {
+            Map<String, Object> emptyResponse = new HashMap<>();
+            emptyResponse.put("content", List.of());
+            emptyResponse.put("page", page);
+            emptyResponse.put("totalElements", 0);
+            emptyResponse.put("totalPages", 0);
+            emptyResponse.put("hasNext", false);
+            emptyResponse.put("hasPrevious", false);
+            return emptyResponse;
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> pageResult = postRepository.findByUserIdInAndIsActiveTrueOrderByCreatedAtDesc(userIds, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", pageResult.getContent());
+        response.put("page", pageResult.getNumber());
+        response.put("totalElements", pageResult.getTotalElements());
+        response.put("totalPages", pageResult.getTotalPages());
+        response.put("hasNext", pageResult.hasNext());
+        response.put("hasPrevious", pageResult.hasPrevious());
+
+        return response;
     }
 
     public void enrichPostsWithCounts(List<Post> posts) {

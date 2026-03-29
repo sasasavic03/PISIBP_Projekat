@@ -13,6 +13,8 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
+  jackson:
+    property-naming-strategy: SNAKE_CASE
 
 server:
   port: 8080

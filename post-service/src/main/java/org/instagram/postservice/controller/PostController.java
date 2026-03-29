@@ -145,15 +145,41 @@ public class PostController {
             @SuppressWarnings("unchecked")
             List<Long> userIds = (List<Long>) request.get("userIds");
             
-            List<Post> posts = postService.getPostsByUserIds(userIds);
-            
-            postService.enrichPostsWithCounts(posts);
-            
-            List<PostWithUserDTO> response = posts.stream()
-                    .map(this::buildPostWithUserDTO)
-                    .collect(Collectors.toList());
-            
-            return ResponseEntity.ok(response);
+            // Check if pagination parameters are provided
+            Integer page = request.containsKey("page") ? ((Number) request.get("page")).intValue() : null;
+            Integer size = request.containsKey("size") ? ((Number) request.get("size")).intValue() : null;
+
+            if (page != null && size != null) {
+                // Paginated response
+                Map<String, Object> paginatedResponse = postService.getPostsByUserIdsPaginated(userIds, page, size);
+                
+                @SuppressWarnings("unchecked")
+                List<Post> posts = (List<Post>) paginatedResponse.get("content");
+                
+                postService.enrichPostsWithCounts(posts);
+                
+                @SuppressWarnings("unchecked")
+                List<Post> enrichedPosts = (List<Post>) paginatedResponse.get("content");
+                List<?> response = enrichedPosts.stream()
+                        .map(this::buildPostWithUserDTO)
+                        .collect(Collectors.toList());
+                
+                Map<String, Object> result = new HashMap<>(paginatedResponse);
+                result.put("content", response);
+                
+                return ResponseEntity.ok(result);
+            } else {
+                // Non-paginated response (legacy behavior)
+                List<Post> posts = postService.getPostsByUserIds(userIds);
+                
+                postService.enrichPostsWithCounts(posts);
+                
+                List<?> response = posts.stream()
+                        .map(this::buildPostWithUserDTO)
+                        .collect(Collectors.toList());
+                
+                return ResponseEntity.ok(response);
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }

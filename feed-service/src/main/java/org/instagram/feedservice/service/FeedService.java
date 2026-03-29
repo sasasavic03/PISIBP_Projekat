@@ -1,6 +1,7 @@
 package org.instagram.feedservice.service;
 
 import org.instagram.feedservice.dto.FeedPostDTO;
+import org.instagram.feedservice.dto.PageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,33 +47,33 @@ public class FeedService {
             // Get following users
             List<Long> followingUserIds = getFollowingUsers(userId);
 
-            // Fetch all posts from followed users
-            List<FeedPostDTO> allPosts = fetchPostsForUsers(followingUserIds);
+            // Fetch posts from followed users with pagination
+            PageResponse<FeedPostDTO> postsResponse = fetchPostsForUsersPaginated(followingUserIds, page, size);
 
-            // Sort by creation date descending (newest first)
-            List<FeedPostDTO> sortedPosts = allPosts.stream()
-                    .sorted(Comparator.comparing(FeedPostDTO::getCreatedAt).reversed())
+            // Get the content list
+            List<FeedPostDTO> pageContent = postsResponse.getContent();
+            if (pageContent == null) {
+                pageContent = new ArrayList<>();
+            }
+            
+            // Sort by creation date descending (newest first), null-safe
+            List<FeedPostDTO> sortedPosts = pageContent.stream()
+                    .sorted(
+                        Comparator.comparing(
+                            FeedPostDTO::getCreatedAt,
+                            Comparator.nullsLast(Comparator.naturalOrder())
+                        ).reversed()
+                    )
                     .collect(Collectors.toList());
 
-            // Calculate pagination
-            int totalItems = sortedPosts.size();
-            int totalPages = (int) Math.ceil((double) totalItems / size);
-            int startIndex = page * size;
-            int endIndex = Math.min(startIndex + size, totalItems);
-
-            // Get page content
-            List<FeedPostDTO> pageContent = startIndex < sortedPosts.size() 
-                    ? sortedPosts.subList(startIndex, endIndex) 
-                    : new ArrayList<>();
-
-            // Build response
+            // Build response with pagination info
             Map<String, Object> response = new HashMap<>();
-            response.put("content", pageContent);
-            response.put("currentPage", page);
-            response.put("totalItems", totalItems);
-            response.put("totalPages", totalPages);
-            response.put("hasNext", page < totalPages - 1);
-            response.put("hasPrevious", page > 0);
+            response.put("content", sortedPosts);
+            response.put("currentPage", postsResponse.getPage());
+            response.put("totalItems", postsResponse.getTotalElements());
+            response.put("totalPages", postsResponse.getTotalPages());
+            response.put("hasNext", postsResponse.getHasNext() != null ? postsResponse.getHasNext() : false);
+            response.put("hasPrevious", postsResponse.getHasPrevious() != null ? postsResponse.getHasPrevious() : false);
             response.put("pageSize", size);
 
             return response;
@@ -110,7 +111,12 @@ public class FeedService {
                 posts = new ArrayList<>();
             }
             List<FeedPostDTO> sortedPosts = posts.stream()
-                    .sorted(Comparator.comparing(FeedPostDTO::getCreatedAt).reversed())
+                    .sorted(
+                        Comparator.comparing(
+                            FeedPostDTO::getCreatedAt,
+                            Comparator.nullsLast(Comparator.naturalOrder())
+                        ).reversed()
+                    )
                     .collect(Collectors.toList());
 
             logger.debug("Fetched {} posts for userId {}", sortedPosts.size(), userId);
@@ -124,33 +130,33 @@ public class FeedService {
 
     public Map<String, Object> getUserProfileFeedPaginated(Long userId, int page, int size) {
         try {
-            // Fetch all posts from post-service for this user
-            List<FeedPostDTO> allPosts = fetchPostsForUsers(new ArrayList<>(List.of(userId)));
+            // Fetch posts from post-service for this user with pagination
+            PageResponse<FeedPostDTO> postsResponse = fetchPostsForUsersPaginated(new ArrayList<>(List.of(userId)), page, size);
 
-            // Sort by creation date descending (newest first)
-            List<FeedPostDTO> sortedPosts = allPosts.stream()
-                    .sorted(Comparator.comparing(FeedPostDTO::getCreatedAt).reversed())
+            // Get the content list
+            List<FeedPostDTO> pageContent = postsResponse.getContent();
+            if (pageContent == null) {
+                pageContent = new ArrayList<>();
+            }
+            
+            // Sort by creation date descending (newest first), null-safe
+            List<FeedPostDTO> sortedPosts = pageContent.stream()
+                    .sorted(
+                        Comparator.comparing(
+                            FeedPostDTO::getCreatedAt,
+                            Comparator.nullsLast(Comparator.naturalOrder())
+                        ).reversed()
+                    )
                     .collect(Collectors.toList());
 
-            // Calculate pagination
-            int totalItems = sortedPosts.size();
-            int totalPages = (int) Math.ceil((double) totalItems / size);
-            int startIndex = page * size;
-            int endIndex = Math.min(startIndex + size, totalItems);
-
-            // Get page content
-            List<FeedPostDTO> pageContent = startIndex < sortedPosts.size() 
-                    ? sortedPosts.subList(startIndex, endIndex) 
-                    : new ArrayList<>();
-
-            // Build response
+            // Build response with pagination info
             Map<String, Object> response = new HashMap<>();
-            response.put("content", pageContent);
-            response.put("currentPage", page);
-            response.put("totalItems", totalItems);
-            response.put("totalPages", totalPages);
-            response.put("hasNext", page < totalPages - 1);
-            response.put("hasPrevious", page > 0);
+            response.put("content", sortedPosts);
+            response.put("currentPage", postsResponse.getPage());
+            response.put("totalItems", postsResponse.getTotalElements());
+            response.put("totalPages", postsResponse.getTotalPages());
+            response.put("hasNext", postsResponse.getHasNext() != null ? postsResponse.getHasNext() : false);
+            response.put("hasPrevious", postsResponse.getHasPrevious() != null ? postsResponse.getHasPrevious() : false);
             response.put("pageSize", size);
 
             return response;
@@ -181,7 +187,12 @@ public class FeedService {
                 posts = new ArrayList<>();
             }
             List<FeedPostDTO> sortedPosts = posts.stream()
-                    .sorted(Comparator.comparing(FeedPostDTO::getCreatedAt).reversed())
+                    .sorted(
+                        Comparator.comparing(
+                            FeedPostDTO::getCreatedAt,
+                            Comparator.nullsLast(Comparator.naturalOrder())
+                        ).reversed()
+                    )
                     .collect(Collectors.toList());
 
             logger.debug("Fetched {} profile posts for userId {}", sortedPosts.size(), userId);
@@ -247,6 +258,52 @@ public class FeedService {
         }
     }
 
+    private Map<String, Object> fetchPostsForUsers(List<Long> userIds, int page, int size) {
+        try {
+            if (userIds.isEmpty()) {
+                Map<String, Object> emptyResponse = new HashMap<>();
+                emptyResponse.put("content", new ArrayList<>());
+                emptyResponse.put("page", page);
+                emptyResponse.put("totalElements", 0);
+                emptyResponse.put("totalPages", 0);
+                emptyResponse.put("hasNext", false);
+                emptyResponse.put("hasPrevious", false);
+                return emptyResponse;
+            }
+
+            String postsUrl = postServiceUrl + "/api/posts/feed";
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("userIds", userIds);
+            requestBody.put("page", page);
+            requestBody.put("size", size);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody);
+
+            ResponseEntity<Map<String, Object>> postsResponse = restTemplate.exchange(
+                    postsUrl,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+
+            Map<String, Object> response = postsResponse.getBody();
+            logger.debug("Fetched posts for {} users on page {} with size {}", 
+                    userIds.size(), page, size);
+            return response != null ? response : new HashMap<>();
+
+        } catch (Exception e) {
+            logger.error("Error fetching posts: {}", e.getMessage(), e);
+            Map<String, Object> emptyResponse = new HashMap<>();
+            emptyResponse.put("content", new ArrayList<>());
+            emptyResponse.put("page", page);
+            emptyResponse.put("totalElements", 0);
+            emptyResponse.put("totalPages", 0);
+            emptyResponse.put("hasNext", false);
+            emptyResponse.put("hasPrevious", false);
+            return emptyResponse;
+        }
+    }
+
     private List<FeedPostDTO> fetchPostsForUsers(List<Long> userIds) {
         try {
             if (userIds.isEmpty()) {
@@ -280,7 +337,7 @@ public class FeedService {
 
     private List<Long> fetchBlockedUserIds(Long userId) {
         try {
-            String url = blockServiceUrl + "/api/blocks/" + userId + "/blocked-ids";
+            String url = blockServiceUrl + "/api/users/" + userId + "/blocked-ids";
             ResponseEntity<List<Long>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -322,7 +379,104 @@ public class FeedService {
             throw new RuntimeException("Failed to fetch user ID for username: " + username, e);
         }
     }
+
+    private FeedPostDTO convertMapToFeedPostDTO(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+        
+        FeedPostDTO dto = new FeedPostDTO();
+        
+        // Convert id - handle both Integer and Long
+        Object id = map.get("id");
+        if (id instanceof Number) {
+            dto.setId(((Number) id).longValue());
+        }
+        
+        // Convert userId - handle both Integer and Long
+        Object userId = map.get("userId");
+        if (userId instanceof Number) {
+            dto.setUserId(((Number) userId).longValue());
+        }
+        
+        dto.setDescription((String) map.get("description"));
+        
+        // Convert mediaCount
+        Object mediaCount = map.get("mediaCount");
+        if (mediaCount instanceof Number) {
+            dto.setMediaCount(((Number) mediaCount).intValue());
+        }
+        
+        // Convert likesCount
+        Object likesCount = map.get("likesCount");
+        if (likesCount instanceof Number) {
+            dto.setLikesCount(((Number) likesCount).intValue());
+        }
+        
+        // Convert commentsCount
+        Object commentsCount = map.get("commentsCount");
+        if (commentsCount instanceof Number) {
+            dto.setCommentsCount(((Number) commentsCount).intValue());
+        }
+        
+        // Convert createdAt
+        Object createdAt = map.get("createdAt");
+        if (createdAt != null) {
+            dto.setCreatedAt((java.time.LocalDateTime) createdAt);
+        }
+        
+        // Convert updatedAt
+        Object updatedAt = map.get("updatedAt");
+        if (updatedAt != null) {
+            dto.setUpdatedAt((java.time.LocalDateTime) updatedAt);
+        }
+        
+        return dto;
+    }
+
+    private PageResponse<FeedPostDTO> fetchPostsForUsersPaginated(List<Long> userIds, int page, int size) {
+        try {
+            if (userIds.isEmpty()) {
+                PageResponse<FeedPostDTO> emptyResponse = new PageResponse<>();
+                emptyResponse.setContent(new ArrayList<>());
+                emptyResponse.setPage(page);
+                emptyResponse.setTotalElements(0L);
+                emptyResponse.setTotalPages(0);
+                emptyResponse.setHasNext(false);
+                emptyResponse.setHasPrevious(false);
+                return emptyResponse;
+            }
+
+            String postsUrl = postServiceUrl + "/api/posts/feed";
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("userIds", userIds);
+            requestBody.put("page", page);
+            requestBody.put("size", size);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody);
+
+            ResponseEntity<PageResponse<FeedPostDTO>> postsResponse = restTemplate.exchange(
+                    postsUrl,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<PageResponse<FeedPostDTO>>() {}
+            );
+
+            PageResponse<FeedPostDTO> response = postsResponse.getBody();
+            logger.debug("Fetched posts for {} users on page {} with size {}", 
+                    userIds.size(), page, size);
+            return response != null ? response : new PageResponse<>();
+
+        } catch (Exception e) {
+            logger.error("Error fetching paginated posts: {}", e.getMessage(), e);
+            PageResponse<FeedPostDTO> emptyResponse = new PageResponse<>();
+            emptyResponse.setContent(new ArrayList<>());
+            emptyResponse.setPage(page);
+            emptyResponse.setTotalElements(0L);
+            emptyResponse.setTotalPages(0);
+            emptyResponse.setHasNext(false);
+            emptyResponse.setHasPrevious(false);
+            return emptyResponse;
+        }
+    }
 }
-
-
-

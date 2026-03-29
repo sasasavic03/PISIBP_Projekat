@@ -9,6 +9,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+  jackson:
+    property-naming-strategy: SNAKE_CASE
 
 server:
   port: 8080

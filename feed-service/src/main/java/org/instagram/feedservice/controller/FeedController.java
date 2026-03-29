@@ -57,19 +57,7 @@ public class FeedController {
         }
     }
 
-    @GetMapping("/{userId}/all")
-    public ResponseEntity<?> getUserProfileFeedComplete(@PathVariable Long userId) {
-        try {
-            List<FeedPostDTO> feed = feedService.getUserProfileFeed(userId);
-            return ResponseEntity.ok(feed);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
-    }
-
-    @GetMapping("/{userId}")
+    @GetMapping("/{userId}/posts")
     public ResponseEntity<?> getUserProfileFeed(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
@@ -81,6 +69,26 @@ public class FeedController {
             if (size > 100) size = 100; // Max page size limit
 
             Map<String, Object> feedData = feedService.getUserProfileFeedPaginated(userId, page, size);
+            return ResponseEntity.ok(feedData);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserFeed(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            // Validate pagination parameters
+            if (page < 0) page = 0;
+            if (size <= 0) size = 10;
+            if (size > 100) size = 100; // Max page size limit
+
+            Map<String, Object> feedData = feedService.getUserFeedPaginated(userId, page, size);
             return ResponseEntity.ok(feedData);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
