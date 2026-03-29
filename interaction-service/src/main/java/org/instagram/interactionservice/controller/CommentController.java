@@ -2,6 +2,7 @@ package org.instagram.interactionservice.controller;
 
 
 import jakarta.validation.Valid;
+import org.instagram.interactionservice.client.UserServiceClient;
 import org.instagram.interactionservice.dto.CommentRequestDto;
 import org.instagram.interactionservice.dto.CommentResponseDto;
 import org.instagram.interactionservice.dto.CommentUpdateDto;
@@ -23,6 +24,9 @@ public class CommentController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private UserServiceClient userServiceClient;
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
@@ -137,7 +141,7 @@ public class CommentController {
 
 
     private CommentResponseDto mapToDto(Comment comment) {
-        return new CommentResponseDto(
+        CommentResponseDto dto = new CommentResponseDto(
                 comment.getId(),
                 comment.getUserId(),
                 comment.getPostId(),
@@ -147,5 +151,21 @@ public class CommentController {
                 comment.getCreatedAt(),
                 comment.getUpdatedAt()
         );
+        
+        // Fetch and populate user information
+        try {
+            Map<String, Object> userDetails = userServiceClient.getUserDetails(comment.getUserId());
+            if (userDetails != null) {
+                dto.setUsername((String) userDetails.get("username"));
+                dto.setAvatar((String) userDetails.get("profilePictureUrl"));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to fetch user details for userId " + comment.getUserId() + ": " + e.getMessage());
+            // Set default values if user service fails
+            dto.setUsername("Unknown User");
+            dto.setAvatar(null);
+        }
+        
+        return dto;
     }
 }

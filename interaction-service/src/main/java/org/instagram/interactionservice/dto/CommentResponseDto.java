@@ -19,4 +19,21 @@ public class CommentResponseDto {
     private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    // User information for frontend
+    private String username;
+    private String avatar;
+    
+    // Constructor without username/avatar for backward compatibility
+    public CommentResponseDto(Long id, Long userId, Long postId, String content, 
+                              Boolean isEdited, Boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.userId = userId;
+        this.postId = postId;
+        this.content = content;
+        this.isEdited = isEdited;
+        this.isDeleted = isDeleted;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }
