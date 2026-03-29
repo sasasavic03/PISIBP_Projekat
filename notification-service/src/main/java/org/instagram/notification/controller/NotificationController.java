@@ -35,13 +35,15 @@ public class NotificationController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<List<NotificationResponseDto>> getNotifications(@PathVariable Long userId){
-        return ResponseEntity.ok(notificationService.getNotifications(userId));
+    public ResponseEntity<List<NotificationResponseDto>> getNotifications(
+            @RequestHeader("X-User-Id") Long currentUserId){
+        return ResponseEntity.ok(notificationService.getNotifications(currentUserId));
     }
 
     @PutMapping("/{userId}/read-all")
-    public ResponseEntity<Map<String,String>> markAllAsRead(@PathVariable Long userId){
-        notificationService.markAllAsRead(userId);
+    public ResponseEntity<Map<String,String>> markAllAsRead(
+            @RequestHeader("X-User-Id") Long currentUserId) {
+        notificationService.markAllAsRead(currentUserId);
         return ResponseEntity.ok(Map.of("message", "All notifications marked as read"));
     }
 

@@ -1,5 +1,6 @@
 package org.instagram.user_service.client;
 
+import org.instagram.user_service.dto.BlockedUserDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,6 @@ import java.util.List;
 public interface BlockServiceClient {
     
     @GetMapping("/api/users/{id}/blocked")
-    List<?> getBlockedUsers(@PathVariable Long id);
+    List<BlockedUserDto> getBlockedUsers(@PathVariable Long id);
 }
 

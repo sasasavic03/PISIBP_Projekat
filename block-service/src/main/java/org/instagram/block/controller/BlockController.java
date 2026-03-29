@@ -28,22 +28,38 @@ public class BlockController {
     }
 
     @PostMapping("/{userId}/block")
-    public ResponseEntity<Map<String, String>> block(@PathVariable Long userId,
-                                      @RequestBody BlockRequestDto request){
-        blockService.block(userId, request.getBlockedId());
-        return ResponseEntity.ok(Map.of("message", "User blocked successfully"));
+    public ResponseEntity<Map<String,String>> block(
+            @PathVariable Long userId,
+            @RequestHeader("X-User-Id") Long currentUserId,
+            @RequestBody BlockRequestDto request){
+        try {
+            blockService.block(currentUserId,request.getBlockedId());
+            return ResponseEntity.ok(Map.of("message","User blocked successfully"));
+        } catch (RuntimeException e){
+            if(e.getMessage().equals("Already Blocked")){
+                return ResponseEntity.ok(Map.of("message","User already blocked"));
+            }
+            return ResponseEntity.badRequest().body(Map.of("Error",e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{userId}/block")
-    public ResponseEntity<Map<String, String>> unblock(@PathVariable Long userId,
-                                        @RequestBody BlockRequestDto request){
-        blockService.unblock(userId, request.getBlockedId());
-        return ResponseEntity.ok(Map.of("message", "User unblocked successfully"));
+    public ResponseEntity<Map<String,String>> unblock(
+            @PathVariable Long userId,
+            @RequestHeader("X-User-Id") Long currentUserId,
+            @RequestBody BlockRequestDto request){
+        try {
+            blockService.unblock(currentUserId,request.getBlockedId());
+            return ResponseEntity.ok(Map.of("message", "User unblocked successfully"));
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(Map.of("Error",e.getMessage()));
+        }
     }
 
     @GetMapping("/{userId}/blocked")
-    public ResponseEntity<List<BlockResponseDto>> getBlockedUsers(@PathVariable Long userId){
-        return ResponseEntity.ok(blockService.getBlockedUsers(userId));
+    public ResponseEntity<List<BlockResponseDto>> getBlockedUsers(
+            @RequestHeader("X-User-Id") Long currentUserId){
+        return ResponseEntity.ok(blockService.getBlockedUsers(currentUserId));
     }
 
     @GetMapping("/{userId}/blocked-ids")

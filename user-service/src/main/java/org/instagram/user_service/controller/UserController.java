@@ -3,14 +3,7 @@ package org.instagram.user_service.controller;
 import org.instagram.user_service.client.BlockServiceClient;
 import org.instagram.user_service.client.FollowServiceClient;
 import org.instagram.user_service.client.PostServiceClient;
-import org.instagram.user_service.dto.CreateUserRequest;
-import org.instagram.user_service.dto.FollowCountResponse;
-import org.instagram.user_service.dto.PostCountResponse;
-import org.instagram.user_service.dto.SuggestionDTO;
-import org.instagram.user_service.dto.UpdateProfileRequest;
-import org.instagram.user_service.dto.UpdatePrivacyRequest;
-import org.instagram.user_service.dto.UserResponse;
-import org.instagram.user_service.dto.UserSearchResultDTO;
+import org.instagram.user_service.dto.*;
 import org.instagram.user_service.service.UserService;
 
 import java.util.HashMap;
@@ -150,8 +143,25 @@ public class UserController {
     @GetMapping("/{id}/blocked")
     public ResponseEntity<?> getBlockedUsers(@PathVariable Long id) {
         try {
-            List<?> blockedUsers = blockServiceClient.getBlockedUsers(id);
-            return ResponseEntity.ok(blockedUsers);
+            List<BlockedUserDto> blockedUsers = blockServiceClient.getBlockedUsers(id);
+
+            List<Map<String, Object>> result = blockedUsers.stream()
+                    .map(b -> {
+                        Map<String, Object> user = new HashMap<>();
+                        user.put("id", b.getBlockedId());
+                        try {
+                            UserResponse userResponse = userService.getUser(b.getBlockedId());
+                            user.put("username", userResponse.getUsername());
+                            user.put("avatar", userResponse.getProfilePictureUrl());
+                        } catch (Exception e) {
+                            user.put("username", null);
+                            user.put("avatar", null);
+                        }
+                        return user;
+                    })
+                    .toList();
+
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Failed to fetch blocked users");
