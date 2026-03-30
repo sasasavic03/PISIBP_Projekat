@@ -1,5 +1,6 @@
 package org.instagram.user_service.service;
 
+import org.instagram.user_service.client.BlockServiceClient;
 import org.instagram.user_service.client.FollowServiceClient;
 import org.instagram.user_service.dto.CreateUserRequest;
 import org.instagram.user_service.dto.SuggestionDTO;
@@ -27,11 +28,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FollowServiceClient followServiceClient;
+    private final BlockServiceClient blockServiceClient;
     private final AvatarService avatarService;
 
-    public UserService(UserRepository userRepository, FollowServiceClient followServiceClient, AvatarService avatarService) {
+    public UserService(UserRepository userRepository, FollowServiceClient followServiceClient, 
+                      BlockServiceClient blockServiceClient, AvatarService avatarService) {
         this.userRepository = userRepository;
         this.followServiceClient = followServiceClient;
+        this.blockServiceClient = blockServiceClient;
         this.avatarService = avatarService;
     }
 
@@ -77,20 +81,62 @@ public class UserService {
         return mapToResponse(user);
     }
 
-    public Page<UserSearchResultDTO> searchUsers(String query, Pageable pageable) {
+    public Page<UserSearchResultDTO> searchUsers(String query, Pageable pageable, Long userId) {
         if (query == null || query.trim().isEmpty()) {
             throw new InvalidUserDataException("Search query cannot be empty");
         }
 
         Page<User> results = userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query, pageable);
         
-        return results.map(user -> new UserSearchResultDTO(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getProfilePictureUrl(),
-                user.isPrivate()
-        ));
+        // Map to DTO and filter out blocked users if userId is provided
+        List<UserSearchResultDTO> dtoList = results.getContent().stream()
+                .map(user -> new UserSearchResultDTO(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getFullname(),
+                        user.getProfilePictureUrl(),
+                        user.isPrivate()
+                ))
+                .toList();
+        
+        // Filter out blocked users if userId is provided
+        if (userId != null) {
+            List<Long> blockedUserIds = getBlockedAndBlockingUserIds(userId);
+            dtoList = dtoList.stream()
+                    .filter(user -> !blockedUserIds.contains(user.getId()))
+                    .toList();
+        }
+        
+        // Create a new Page object with filtered content
+        return new org.springframework.data.domain.PageImpl<>(
+                dtoList,
+                pageable,
+                results.getTotalElements() - (results.getContent().size() - dtoList.size())
+        );
+    }
+
+    private List<Long> getBlockedAndBlockingUserIds(Long userId) {
+        try {
+            List<Long> allBlockedIds = new java.util.ArrayList<>();
+            
+            // Get users that this user has blocked
+            List<Long> blockedIds = blockServiceClient.getBlockedUserIds(userId);
+            if (blockedIds != null) {
+                allBlockedIds.addAll(blockedIds);
+            }
+            
+            // Get users that have blocked this user (so we don't show them in search)
+            List<Long> blockingMeIds = blockServiceClient.getUsersBlockingMe(userId);
+            if (blockingMeIds != null) {
+                allBlockedIds.addAll(blockingMeIds);
+            }
+            
+            return allBlockedIds;
+        } catch (Exception e) {
+            // If we can't get blocked users, just proceed without filtering
+            return new java.util.ArrayList<>();
+        }
     }
 
     public UserResponse updateUser(Long userId, Long currentUserId, UpdateProfileRequest request) {

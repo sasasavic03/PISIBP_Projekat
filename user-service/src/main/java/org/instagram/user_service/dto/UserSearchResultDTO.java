@@ -1,17 +1,24 @@
 package org.instagram.user_service.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class UserSearchResultDTO {
     private Long id;
     private String username;
     private String email;
+    @JsonProperty("fullName")
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    private String fullName;
     private String profilePictureUrl;
     private boolean isPrivate;
 
-    public UserSearchResultDTO(Long id, String username, String email, 
+    public UserSearchResultDTO(Long id, String username, String email, String fullName,
                               String profilePictureUrl, boolean isPrivate) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.fullName = fullName;
         this.profilePictureUrl = profilePictureUrl;
         this.isPrivate = isPrivate;
     }
@@ -38,6 +45,14 @@ public class UserSearchResultDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getProfilePictureUrl() {

@@ -12,5 +12,11 @@ public interface BlockServiceClient {
     
     @GetMapping("/api/users/{id}/blocked")
     List<BlockedUserDto> getBlockedUsers(@PathVariable Long id);
+    
+    @GetMapping("/api/users/{id}/blocked-ids")
+    List<Long> getBlockedUserIds(@PathVariable Long id);
+    
+    @GetMapping("/api/users/{id}/blocking-me-ids")
+    List<Long> getUsersBlockingMe(@PathVariable Long id);
 }
 

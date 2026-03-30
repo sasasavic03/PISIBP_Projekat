@@ -75,9 +75,10 @@ public class UserController {
     public ResponseEntity<Page<UserSearchResultDTO>> searchUsers(
             @RequestParam String q,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 50));
-        Page<UserSearchResultDTO> results = userService.searchUsers(q, pageable);
+        Page<UserSearchResultDTO> results = userService.searchUsers(q, pageable, userId);
         return ResponseEntity.ok(results);
     }
 
