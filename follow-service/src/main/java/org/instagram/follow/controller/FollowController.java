@@ -97,4 +97,16 @@ public class FollowController {
         service.acceptFollow(followerId, followingId);
         return ResponseEntity.ok(Map.of("status", "accepted"));
     }
+
+    @GetMapping("/{targetUserId}/status")
+    public ResponseEntity<Map<String, Object>> getFollowStatus(
+            @PathVariable Long targetUserId,
+            @RequestHeader("X-User-Id") Long followerId) {
+        String status = service.getFollowStatus(followerId, targetUserId);
+        return ResponseEntity.ok(Map.of(
+                "following", status.equals("following"),
+                "requested", status.equals("requested"),
+                "status", status
+        ));
+    }
 }

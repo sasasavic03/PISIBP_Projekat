@@ -5,6 +5,7 @@ import org.instagram.notification.client.UserServiceClient;
 import org.instagram.notification.dto.NotificationRequestDto;
 import org.instagram.notification.dto.NotificationResponseDto;
 import org.instagram.notification.model.Notification;
+import org.instagram.notification.model.NotificationType;
 import org.instagram.notification.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
@@ -82,14 +83,12 @@ public class NotificationService {
         notificationRepository.saveAll(notifications);
     }
 
-    public void acceptFollowRequest(Long notificationId) {
+    public void acceptFollowRequest(Long notificationId){
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                .orElseThrow(()-> new RuntimeException("Notification not found"));
+        followServiceClient.acceptFollow(notification.getSenderId(),notification.getRecipientId());
 
-        followServiceClient.acceptFollow(notification.getSenderId(), notification.getRecipientId());
-
-        notification.setRead(true);
-        notificationRepository.save(notification);
+        notificationRepository.delete(notification);
     }
 
     public void declineFollowRequest(Long notificationId){
@@ -98,4 +97,9 @@ public class NotificationService {
         notificationRepository.delete(notification);
     }
 
+    public void cancelFollowRequest(Long senderId, Long recipientId) {
+        notificationRepository
+                .findBySenderIdAndRecipientIdAndType(senderId, recipientId, NotificationType.FOLLOW_REQUEST)
+                .ifPresent(notificationRepository::delete);
+    }
 }

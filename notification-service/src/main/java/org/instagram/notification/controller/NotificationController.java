@@ -59,4 +59,12 @@ public class NotificationController {
         return ResponseEntity.ok(Map.of("message", "Follow request declined"));
     }
 
+    @DeleteMapping("/follow-request/cancel")
+    public ResponseEntity<Map<String, String>> cancelFollowRequest(
+            @RequestParam Long senderId,
+            @RequestParam Long recipientId) {
+        notificationService.cancelFollowRequest(senderId, recipientId);
+        return ResponseEntity.ok(Map.of("message", "Follow request cancelled"));
+    }
+
 }
