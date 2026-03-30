@@ -11,5 +11,6 @@ export async function searchUsers(query) {
     }
   });
   if (!response.ok) throw new Error("Search failed");
-  return response.json();
+  const data = await response.json();
+  return data.content;
 }
