@@ -2,8 +2,10 @@ package org.instagram.interactionservice.controller;
 
 
 import jakarta.validation.Valid;
+import org.instagram.interactionservice.client.UserServiceClient;
 import org.instagram.interactionservice.dto.LikeRequestDto;
 import org.instagram.interactionservice.dto.LikeResponseDto;
+import org.instagram.interactionservice.dto.LikeWithUserDto;
 import org.instagram.interactionservice.entity.Like;
 import org.instagram.interactionservice.service.LikeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ public class LikeController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private UserServiceClient userServiceClient;
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
@@ -127,6 +132,27 @@ public class LikeController {
                         like.getPostId(),
                         like.getCreatedAt()
                 ))
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(likeDtos);
+    }
+
+    @GetMapping("/post/{postId}/with-users")
+    public ResponseEntity<List<LikeWithUserDto>> getPostLikesWithUsers(@PathVariable Long postId) {
+        List<Like> likes = likeService.getPostLikes(postId);
+        
+        List<LikeWithUserDto> likeDtos = likes.stream()
+                .map(like -> {
+                    Map<String, Object> userDetails = userServiceClient.getUserDetails(like.getUserId());
+                    return LikeWithUserDto.builder()
+                            .id(like.getId())
+                            .userId(like.getUserId())
+                            .postId(like.getPostId())
+                            .createdAt(like.getCreatedAt())
+                            .username((String) userDetails.getOrDefault("username", "Unknown User"))
+                            .avatar((String) userDetails.getOrDefault("profilePictureUrl", null))
+                            .build();
+                })
                 .collect(Collectors.toList());
         
         return ResponseEntity.ok(likeDtos);

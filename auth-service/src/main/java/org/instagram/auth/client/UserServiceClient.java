@@ -14,6 +14,9 @@ public interface UserServiceClient {
     @PostMapping("/users")
     UserProfileResponse createUserProfile(@RequestBody CreateUserRequest request);
 
+    @GetMapping("/users/{id}")
+    UserProfileResponse getUserById(@PathVariable("id") Long id);
+
     @GetMapping("/users/username/{username}")
     UserProfileResponse getUserByUsername(@PathVariable("username") String username);
 }

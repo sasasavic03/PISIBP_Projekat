@@ -4,6 +4,7 @@ import org.instagram.user_service.client.BlockServiceClient;
 import org.instagram.user_service.client.FollowServiceClient;
 import org.instagram.user_service.client.PostServiceClient;
 import org.instagram.user_service.dto.*;
+import org.instagram.user_service.service.AvatarService;
 import org.instagram.user_service.service.UserService;
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/users")
@@ -26,12 +28,14 @@ public class UserController {
     private final BlockServiceClient blockServiceClient;
     private final FollowServiceClient followServiceClient;
     private final PostServiceClient postServiceClient;
+    private final AvatarService avatarService;
 
-    public UserController(UserService userService, BlockServiceClient blockServiceClient, FollowServiceClient followServiceClient, PostServiceClient postServiceClient) {
+    public UserController(UserService userService, BlockServiceClient blockServiceClient, FollowServiceClient followServiceClient, PostServiceClient postServiceClient, AvatarService avatarService) {
         this.userService = userService;
         this.blockServiceClient = blockServiceClient;
         this.followServiceClient = followServiceClient;
         this.postServiceClient = postServiceClient;
+        this.avatarService = avatarService;
     }
 
     @PostMapping
@@ -176,5 +180,34 @@ public class UserController {
     public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
         UserResponse response = userService.getUser(id);
         return ResponseEntity.ok(response);
+    }
+
+
+
+    @PostMapping("/{id}/avatar")
+    public ResponseEntity<Map<String, String>> uploadAvatar(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long currentUserId,
+            @RequestParam("file") MultipartFile file) {
+
+        if (!id.equals(currentUserId)) {
+            return ResponseEntity.status(403).body(Map.of("error", "Cannot update another user's avatar"));
+        }
+
+        String url = avatarService.uploadAvatar(id, file);
+        return ResponseEntity.ok(Map.of("profilePictureUrl", url));
+    }
+
+    @DeleteMapping("/{id}/avatar")
+    public ResponseEntity<Map<String, String>> deleteAvatar(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long currentUserId) {
+
+        if (!id.equals(currentUserId)) {
+            return ResponseEntity.status(403).body(Map.of("error", "Cannot update another user's avatar"));
+        }
+
+        String url = avatarService.deleteAvatar(id);
+        return ResponseEntity.ok(Map.of("profilePictureUrl", url));
     }
 }

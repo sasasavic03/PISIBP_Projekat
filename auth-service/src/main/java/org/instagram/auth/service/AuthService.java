@@ -68,7 +68,18 @@ public class AuthService {
 
         String token = jwtService.generateToken(user.getUsername(), userProfileId);
 
-        return new AuthResponse(token, userProfileId, user.getUsername(), null);
+        // Fetch avatar from user profile
+        String avatar = null;
+        try {
+            UserProfileResponse profileResponse = userServiceClient.getUserById(userProfileId);
+            if (profileResponse != null) {
+                avatar = profileResponse.getProfilePictureUrl();
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to fetch avatar for newly registered user: {}", user.getUsername());
+        }
+
+        return new AuthResponse(token, userProfileId, user.getUsername(), avatar);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -84,7 +95,18 @@ public class AuthService {
         Long canonicalUserId = resolveCanonicalUserId(user);
         String token = jwtService.generateToken(user.getUsername(), canonicalUserId);
 
-        return new AuthResponse(token, canonicalUserId, user.getUsername(), null);
+        // Fetch avatar from user profile
+        String avatar = null;
+        try {
+            UserProfileResponse profileResponse = userServiceClient.getUserById(canonicalUserId);
+            if (profileResponse != null) {
+                avatar = profileResponse.getProfilePictureUrl();
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to fetch avatar for user during login: {}", user.getUsername());
+        }
+
+        return new AuthResponse(token, canonicalUserId, user.getUsername(), avatar);
     }
 
     private Long resolveCanonicalUserId(User user) {

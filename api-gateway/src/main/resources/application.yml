@@ -74,6 +74,16 @@ spring:
               filters:
                 - RewritePath=/api/notification(?<segment>/?.*), /api/notification${segment}
 
+            - id: minio-avatars
+              uri: http://minio:9000
+              predicates:
+                - Path=/avatars/**
+              filters:
+                - RewritePath=/avatars(?<segment>/?.*), /avatars${segment}
+                - AddResponseHeader=Access-Control-Allow-Origin,*
+                - AddResponseHeader=Access-Control-Allow-Methods,GET
+                - AddResponseHeader=Access-Control-Allow-Headers,*
+
 server:
   port: 8080
 
@@ -106,6 +116,7 @@ gateway:
     - /api/auth/validate
     - /api/posts/media/
     - /api/interactions/posts/batch
+    - /avatars/
     - /health
     - /api/health
     - /actuator/health

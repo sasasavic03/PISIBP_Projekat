@@ -27,10 +27,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FollowServiceClient followServiceClient;
+    private final AvatarService avatarService;
 
-    public UserService(UserRepository userRepository, FollowServiceClient followServiceClient) {
+    public UserService(UserRepository userRepository, FollowServiceClient followServiceClient, AvatarService avatarService) {
         this.userRepository = userRepository;
         this.followServiceClient = followServiceClient;
+        this.avatarService = avatarService;
     }
 
     public UserResponse createUser(CreateUserRequest request) {
@@ -53,6 +55,7 @@ public class UserService {
         }
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
+        user.setProfilePictureUrl(avatarService.getDefaultAvatarUrl());
         user.setCreatedAt(LocalDateTime.now());
 
         User savedUser = userRepository.save(user);
