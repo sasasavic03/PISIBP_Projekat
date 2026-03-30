@@ -2,6 +2,58 @@
 
 [Postvaka](./Projektni_zadatak_PISIBP_2025.pdf) - Kreirati repliku društvene mreže Instagram
 
+Projekat je radjen po ugledu na društvenu mrežu instagram, koristi mikroservisnu arhitekturu u SpringBoot-u. Svaki od servisa ima definisanu ulogu i odgovornost kao i bazu sa kojom radi.Omogućene su funkcionalnosti poput follow-a, blocka-a, kao i obljavljivanja slika videa i lajkovanja istih.
+Svi zahtevi se šalju na centralni API Gateway koji dalje rutira saobraćaj i validira JWT tokene.
+
+# Članovi tima:
+* Nikola Živanović 659/2018
+* Uroš Bošković 569/2016
+* Aleksandar Savić 621/2022
+* Marko Galetin 640/2022
+
+---
+
+## Tech Stack
+
+| Tehnologija             | Verzija / Detalj        |
+|-------------------------|-------------------------|
+| Java                    | 21                      |
+| React                   | 19.2.0                  |
+| Spring Boot             | 4.0.3+                  |
+| Spring Cloud Gateway    | API Gateway             |
+| PostgreSQL              | Relaciona baza podataka |
+| MinIO                   | Object storage (slike)  |
+| JWT (HS256)             | Autentifikacija         |
+| Docker & Docker Compose | Kontejnerizacija        |
+
+---
+
+## Arhitektura
+
+Aplikacija koristi **API Gateway** kao jedinu ulaznu tačku. Svi klijentski zahtevi prolaze kroz gateway koji ih rutira do odgovarajućeg mikroservisa.
+
+```
+Client → API Gateway (8081) → [Microservices]
+```
+
+### Pregled servisa
+![img_1.png](img_1.png)
+
+
+---
+
+### Komunikacija između servisa
+
+![img_2.png](img_2.png)
+
+---
+
+### Tok autentifikacije
+
+
+![img_3.png](img_3.png)
+
+---
 # Prerequisites
 
 Pre pokretanja projekta potrebno je instalirati:
@@ -30,7 +82,6 @@ git pull
 ```
 
 ---
-
 # Konfiguracija okruženja
 
 U root direktorijumu projekta potrebno je napraviti `.env` fajl.
