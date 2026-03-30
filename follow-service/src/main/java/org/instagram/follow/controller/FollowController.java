@@ -109,4 +109,16 @@ public class FollowController {
                 "status", status
         ));
     }
+
+    @DeleteMapping("/{targetUserId}/remove")
+    public ResponseEntity<Map<String, String>> removeFollow(
+            @PathVariable Long targetUserId,
+            @RequestParam Long followerId) {
+        try {
+            service.unfollow(followerId, targetUserId);
+            return ResponseEntity.ok(Map.of("status", "unfollowed"));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("status", "not_found"));
+        }
+    }
 }

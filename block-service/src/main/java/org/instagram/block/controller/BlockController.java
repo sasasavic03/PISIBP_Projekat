@@ -73,4 +73,9 @@ public class BlockController {
         return ResponseEntity.ok(blockService.isBlocked(blockerId, blockedId));
     }
 
+    @GetMapping("/api/users/{userId}/blocked-by-ids")
+    public ResponseEntity<List<Long>> getBlockerIds(@PathVariable Long userId) {
+        return ResponseEntity.ok(blockService.getBlockerIds(userId));
+    }
+
 }

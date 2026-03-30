@@ -1,5 +1,6 @@
 package org.instagram.block.service;
 
+import org.instagram.block.client.FollowServiceClient;
 import org.instagram.block.client.UserServiceClient;
 import org.instagram.block.dto.BlockResponseDto;
 import org.instagram.block.model.Block;
@@ -16,10 +17,13 @@ public class BlockService {
 
     private final BlockRepository blockRepository;
     private final UserServiceClient userServiceClient;
+    private final FollowServiceClient followServiceClient;
 
-    public BlockService(BlockRepository blockRepository, UserServiceClient userServiceClient) {
+    public BlockService(BlockRepository blockRepository, UserServiceClient userServiceClient,
+                        FollowServiceClient followServiceClient) {
         this.blockRepository = blockRepository;
         this.userServiceClient = userServiceClient;
+        this.followServiceClient = followServiceClient;
     }
 
     public void block(Long blockerId, Long blockedId) {
@@ -31,6 +35,8 @@ public class BlockService {
         block.setBlockedId(blockedId);
         block.setCreatedAt(LocalDateTime.now());
         blockRepository.save(block);
+
+        followServiceClient.removeFollowRelations(blockerId, blockedId);
     }
 
     public void unblock(Long blockerId, Long blockedId) {
@@ -66,6 +72,12 @@ public class BlockService {
         return blockRepository.findByBlockerId(blockerId)
                 .stream()
                 .map(Block::getBlockedId)
+                .toList();
+    }
+    public List<Long> getBlockerIds(Long blockedId){
+        return blockRepository.findByBlockedId(blockedId)
+                .stream()
+                .map(Block::getBlockerId)
                 .toList();
     }
 }

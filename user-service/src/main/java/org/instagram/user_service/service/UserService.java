@@ -127,7 +127,7 @@ public class UserService {
             }
             
             // Get users that have blocked this user (so we don't show them in search)
-            List<Long> blockingMeIds = blockServiceClient.getUsersBlockingMe(userId);
+            List<Long> blockingMeIds = blockServiceClient.getBlockerIds(userId);
             if (blockingMeIds != null) {
                 allBlockedIds.addAll(blockingMeIds);
             }
