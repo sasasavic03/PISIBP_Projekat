@@ -42,6 +42,9 @@ public class Post {
     @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean isActive = true;
 
+    @Column(name = "order_index")
+    private Integer orderIndex;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

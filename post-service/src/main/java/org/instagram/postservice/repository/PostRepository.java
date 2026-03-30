@@ -20,4 +20,6 @@ public interface PostRepository extends JpaRepository<Post ,Long> {
     
     @Query("SELECT DISTINCT p FROM Post p LEFT JOIN FETCH p.mediaList m WHERE p.userId IN :userIds AND p.isActive = true ORDER BY p.createdAt DESC")
     List<Post> findByUserIdInWithMediaAndIsActiveTrueOrderByCreatedAtDesc(@Param("userIds") List<Long> userIds);
+    
+    List<Post> findByUserIdAndIsActiveTrueOrderByOrderIndexAsc(Long userId);
 }
