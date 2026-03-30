@@ -19,11 +19,13 @@ import static org.mockito.Mockito.*;
 class FollowServiceApplicationTests {
 
     @Mock
+    private org.instagram.follow.client.NotificationClient notificationClient;
+
+    @Mock
     private FollowRepository repository;
 
     @InjectMocks
     private FollowService service;
-
 
     //TEST JAVNI PROFIL
     @Test

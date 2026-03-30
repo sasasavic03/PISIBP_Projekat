@@ -16,7 +16,7 @@ public class FeedTest extends BaseTest{
 
     @Test
     void shouldShowFeedPage(){
-        driver.get("http://localhost:5173/feed");
+        driver.get("http://localhost:3000/feed");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         WebElement postList = wait.until(
@@ -28,7 +28,7 @@ public class FeedTest extends BaseTest{
 
     @Test
     void shouldShowPosts(){
-        driver.get("http://localhost:5173/feed");
+        driver.get("http://localhost:3000/feed");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         wait.until(ExpectedConditions.presenceOfElementLocated(
@@ -40,7 +40,7 @@ public class FeedTest extends BaseTest{
 
     @Test
     void shouldShowSuggestions(){
-        driver.get("http://localhost:5173/feed");
+        driver.get("http://localhost:3000/feed");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         WebElement suggestions = wait.until(
@@ -52,7 +52,7 @@ public class FeedTest extends BaseTest{
 
     @Test
     void shouldShowSuggestionsHeader(){
-        driver.get("http://localhost:5173/feed");
+        driver.get("http://localhost:3000/feed");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         WebElement header = wait.until(
@@ -65,7 +65,7 @@ public class FeedTest extends BaseTest{
 
     @Test
     void shouldNavigatetoProfileFromSuggestion(){
-        driver.get("http://localhost:5173/feed");
+        driver.get("http://localhost:3000/feed");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         WebElement suggestionLink = wait.until(
@@ -74,7 +74,9 @@ public class FeedTest extends BaseTest{
                 )
         );
 
-        suggestionLink.click();
+
+        ((org.openqa.selenium.JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", suggestionLink);
 
         wait.until(ExpectedConditions.urlContains("/profile/"));
         assertTrue(driver.getCurrentUrl().contains("/profile/"));

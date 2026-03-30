@@ -26,6 +26,12 @@ public class BlockServiceTest {
     @Mock
     private BlockRepository blockRepository;
 
+    @Mock
+    private org.instagram.block.client.UserServiceClient userServiceClient;
+
+    @Mock
+    private org.instagram.block.client.FollowServiceClient followServiceClient;
+
     @InjectMocks
     private BlockService blockService;
 
@@ -92,10 +98,11 @@ public class BlockServiceTest {
     @Test
     void getBlockedUsers_ShouldReturnList(){
         when(blockRepository.findByBlockerId(1L)).thenReturn(List.of(block));
+        when(userServiceClient.getUserById(any())).thenReturn(null);
 
         List<BlockResponseDto> result = blockService.getBlockedUsers(1L);
 
-        assertEquals(1,result.size());
-        assertEquals(1L,result.get(0).getBlockerId());
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getBlockerId());
     }
 }

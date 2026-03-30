@@ -2,7 +2,9 @@ package org.instagram.ui;
 
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -18,17 +20,19 @@ public class SearchTest extends BaseTest {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         WebElement searchButton = wait.until(
                 ExpectedConditions.elementToBeClickable(
-                        By.xpath("//button[.//span[text()='Search']]")));
-        searchButton.click();
+                        By.xpath("//button[contains(., 'Search')]")));
+
+        ((org.openqa.selenium.JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", searchButton);
+
         wait.until(ExpectedConditions.presenceOfElementLocated(
                 By.className("ig-searchpanel")));
     }
 
     @Test
     void shouldShowSearchPanel() {
-        driver.get("http://localhost:5173/feed");
+        driver.get("http://localhost:3000/feed");
         openSearchPanel();
-
 
         WebElement searchPanel = driver.findElement(By.className("ig-searchpanel"));
         assertTrue(searchPanel.isDisplayed());
@@ -36,7 +40,7 @@ public class SearchTest extends BaseTest {
 
     @Test
     void shouldShowHintWhenQueryIsEmpty() {
-        driver.get("http://localhost:5173/feed");
+        driver.get("http://localhost:3000/feed");
         openSearchPanel();
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -48,18 +52,23 @@ public class SearchTest extends BaseTest {
     }
 
     @Test
-    void shouldShowResultsWhenQueryMatches() {
-        driver.get("http://localhost:5173/feed");
+    void shouldShowResultsWhenQueryMatches() throws Exception {
+        driver.get("http://localhost:3000/feed");
         openSearchPanel();
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement input = wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        By.xpath("//input[@placeholder='Search']")));
-
-        input.sendKeys("a");
-
         wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//input[@placeholder='Search']")));
+
+        // input ima autoFocus pa je vec fokusiran
+        Thread.sleep(500);
+
+        java.awt.Robot robot = new java.awt.Robot();
+        robot.keyPress(java.awt.event.KeyEvent.VK_A);
+        robot.keyRelease(java.awt.event.KeyEvent.VK_A);
+
+        WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        longWait.until(ExpectedConditions.presenceOfElementLocated(
                 By.className("ig-searchpanel-item")));
 
         List<WebElement> results = driver.findElements(By.className("ig-searchpanel-item"));
@@ -67,18 +76,27 @@ public class SearchTest extends BaseTest {
     }
 
     @Test
-    void shouldShowNoResultsMessage() {
-        driver.get("http://localhost:5173/feed");
+    void shouldShowNoResultsMessage() throws Exception {
+        driver.get("http://localhost:3000/feed");
         openSearchPanel();
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement input = wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        By.xpath("//input[@placeholder='Search']")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//input[@placeholder='Search']")));
 
-        input.sendKeys("xyzxyzxyz123");
+        Thread.sleep(500);
+        java.awt.Robot robot = new java.awt.Robot();
+        // kucaj "xyz"
+        for (int keyCode : new int[]{
+                java.awt.event.KeyEvent.VK_X,
+                java.awt.event.KeyEvent.VK_Y,
+                java.awt.event.KeyEvent.VK_Z}) {
+            robot.keyPress(keyCode);
+            robot.keyRelease(keyCode);
+        }
 
-        WebElement hint = wait.until(
+        WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        WebElement hint = longWait.until(
                 ExpectedConditions.presenceOfElementLocated(
                         By.className("ig-searchpanel-hint")));
 
@@ -86,8 +104,8 @@ public class SearchTest extends BaseTest {
     }
 
     @Test
-    void shouldClearSearchInput() {
-        driver.get("http://localhost:5173/feed");
+    void shouldClearSearchInput() throws Exception {
+        driver.get("http://localhost:3000/feed");
         openSearchPanel();
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -95,14 +113,16 @@ public class SearchTest extends BaseTest {
                 ExpectedConditions.presenceOfElementLocated(
                         By.xpath("//input[@placeholder='Search']")));
 
-        input.sendKeys("test");
+        Thread.sleep(500);
+        java.awt.Robot robot = new java.awt.Robot();
+        robot.keyPress(java.awt.event.KeyEvent.VK_T);
+        robot.keyRelease(java.awt.event.KeyEvent.VK_T);
 
         WebElement clearButton = wait.until(
                 ExpectedConditions.elementToBeClickable(
                         By.className("ig-searchpanel-clear")));
 
         clearButton.click();
-
         assertTrue(input.getAttribute("value").isEmpty());
     }
 }

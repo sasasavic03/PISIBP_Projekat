@@ -28,6 +28,12 @@ public class NotificationServiceTest {
     @Mock
     private NotificationRepository notificationRepository;
 
+    @Mock
+    private org.instagram.notification.client.UserServiceClient userServiceClient;
+
+    @Mock
+    private org.instagram.notification.client.FollowServiceClient followServiceClient;
+
     @InjectMocks
     private NotificationService notificationService;
 
@@ -61,10 +67,11 @@ public class NotificationServiceTest {
     void getNotifications_ShouldReturnList(){
         when(notificationRepository.findByRecipientIdOrderByCreatedAtDesc(2L))
                 .thenReturn(List.of(notification));
+        when(userServiceClient.getUserById(1L)).thenReturn(null); // ili mock UserResponse
 
         List<NotificationResponseDto> result = notificationService.getNotifications(2L);
 
-        assertEquals(1,result.size());
+        assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getSenderId().longValue());
     }
 
