@@ -317,3 +317,8 @@
   display: flex;
   flex-direction: column;
 }
+
+.ig-modal-actions button:focus,
+.ig-modal-actions button:focus-visible {
+  outline: none;
+}

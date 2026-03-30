@@ -204,4 +204,25 @@
   100% { transform: translate(-50%, -50%) scale(1);   opacity: 0; }
 }
 
+.ig-post_stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ig-post_comment-count {
+  font-size: 14px;
+  color: var(--ig-muted);
+  cursor: pointer;
+}
+
+.ig-post_comment-count:hover {
+  color: var(--ig-text);
+}
+
+
+.ig-post_actions button:focus,
+.ig-post_actions button:focus-visible {
+  outline: none;
+}
 
