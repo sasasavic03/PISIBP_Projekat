@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./profileheader.css";
 import FollowersModal from "./followersmodal/FollowersModal";
 import ProfileOptionsModal from "./profile_options_modal/ProfileOptionsModal";
-import { followUser, unfollowUser, checkFollow, cancelFollowRequest } from "../../api/followApi";
+import { followUser, unfollowUser, checkFollow, cancelFollowRequest, getFollowers, getFollowing } from "../../api/followApi";
 
 export default function ProfileHeader({ user, stats, isOwnProfile }) {
 
@@ -11,6 +11,10 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
   const [followed, setFollowed] = useState(false);
   const [requested, setRequested] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+
+  const [followersList, setFollowersList] = useState([]);
+  const [followingList, setFollowingList] = useState([]);
+  const [loadingFollowers, setLoadingFollowers] = useState(false);
 
   const currentUserId = parseInt(localStorage.getItem("userId")) || null;
 
@@ -29,6 +33,28 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
       checkFollowStatus();
     }
   }, [user, isOwnProfile]);
+
+    useEffect(() => {
+    if (modalType && user?.id) {
+      const fetchFollowersData = async () => {
+        setLoadingFollowers(true);
+        try {
+          if (modalType === "followers") {
+            const data = await getFollowers(user.id);
+            setFollowersList(data);
+          } else if (modalType === "following") {
+            const data = await getFollowing(user.id);
+            setFollowingList(data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch followers/following:", err);
+        } finally {
+          setLoadingFollowers(false);
+        }
+      };
+      fetchFollowersData();
+    }
+  }, [modalType, user?.id]);
 
 
   async function handleFollow() {
@@ -129,7 +155,8 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
         {modalType && (
           <FollowersModal
             type={modalType}
-            users={modalType === "followers" ? user.followers : user.following}
+            users={modalType === "followers" ? followersList : followingList}
+            loading={loadingFollowers}
             onClose={() => setModalType(null)}
           />
         )}

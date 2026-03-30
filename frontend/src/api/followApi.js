@@ -33,7 +33,7 @@ export async function unfollowUser(targetUserId) {
 }
 
 export async function getFollowers(userId) {
-  const response = await fetch(`${BASE_URL}/${userId}/followers`, {
+  const response = await fetch(`${BASE_URL}/${userId}/followers-details`, {
     headers: authHeaders()
   });
   if (!response.ok) throw new Error("Failed to fetch followers");
@@ -41,7 +41,7 @@ export async function getFollowers(userId) {
 }
 
 export async function getFollowing(userId) {
-  const response = await fetch(`${BASE_URL}/${userId}/following`, {
+  const response = await fetch(`${BASE_URL}/${userId}/following-details`, {
     headers: authHeaders()
   });
   if (!response.ok) throw new Error("Failed to fetch following");

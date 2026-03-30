@@ -3,7 +3,7 @@ import {useParams} from "react-router-dom";
 import ProfileHeader from "./ProfileHeader";
 import PostsGrid from "./PostsGrid";
 import "./profile.css"
-import { getUserProfile, getUserStats, getBlockedUsers, unblockUser } from "../../api/userApi";
+import { getUserProfile, getUserStats, getBlockedUsers, unblockUser, isBlockedBy } from "../../api/userApi";
 import { checkFollow } from "../../api/followApi";
 
 const loggedUser = {
@@ -19,6 +19,8 @@ export default function ProfilePage(){
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null)
   const [isFollowing, setIsFollowing] = useState(false);
+
+  const [blockedByUser, setBlockedByUser] = useState(false);
 
   const {username} = useParams();
 
@@ -48,6 +50,12 @@ export default function ProfilePage(){
             setIsFollowing(followData.following ?? false);
           } catch (err) {
             console.error("Failed to check follow status:", err);
+          }
+          try {
+            const blockedBy = await isBlockedBy(profileData.id);
+            setBlockedByUser(blockedBy === true);
+          } catch (err) {
+            console.error("Failed to check if blocked by user:", err);
           }
         }
 
@@ -93,6 +101,18 @@ export default function ProfilePage(){
           </button>
         </div>
       </div>
+    );
+  }
+  
+  if (blockedByUser) {
+    return (
+        <div className="profile">
+          <div className="ig-blocked-view">
+            <div className="ig-private-icon">🚫</div>
+            <h2 className="ig-blocked-username">{profile.username}</h2>
+            <p className="ig-blocked-text">This content is not available.</p>
+          </div>
+        </div>
     );
   }
 

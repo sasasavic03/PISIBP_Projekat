@@ -7,6 +7,7 @@ function getToken() {
 export async function searchUsers(query) {
   const response = await fetch(`${BASE_URL}/search?q=${encodeURIComponent(query)}`, {
     headers: {
+      "Content-Type": "application/json",
       "Authorization": `Bearer ${getToken()}`
     }
   });

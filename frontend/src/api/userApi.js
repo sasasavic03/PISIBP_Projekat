@@ -98,3 +98,11 @@ export async function updatePrivacy(userId, isPrivate) {
   if (!response.ok) throw new Error("Failed to update privacy");
   return response.json();
 }
+
+export async function isBlockedBy(targetUserId) {
+  const response = await fetch(`${BASE_URL}/check?blockerId=${targetUserId}&blockedId=${localStorage.getItem("userId")}`, {
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to check block status");
+  return response.json();
+}
