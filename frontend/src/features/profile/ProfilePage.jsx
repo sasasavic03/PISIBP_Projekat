@@ -4,6 +4,7 @@ import ProfileHeader from "./ProfileHeader";
 import PostsGrid from "./PostsGrid";
 import "./profile.css"
 import { getUserProfile, getUserStats, getBlockedUsers, unblockUser } from "../../api/userApi";
+import { checkFollow } from "../../api/followApi";
 
 const loggedUser = {
   id: parseInt(localStorage.getItem("userId")) || 1,
@@ -17,8 +18,11 @@ export default function ProfilePage(){
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null)
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const {username} = useParams();
+
+  
 
 
 
@@ -37,6 +41,16 @@ export default function ProfilePage(){
         setProfile(profileData);
         setStats(statsData);
         setBlocked(blockedData.map(u => u.username));
+
+        if (profileData.id !== loggedUser.id) {
+          try {
+            const followData = await checkFollow(profileData.id);
+            setIsFollowing(followData.following ?? false);
+          } catch (err) {
+            console.error("Failed to check follow status:", err);
+          }
+        }
+
       } catch (err) {
         setError(err.message);
         console.error("Failed to fetch profile:", err);
@@ -64,7 +78,6 @@ export default function ProfilePage(){
 
   const isOwnProfile = profile.id === loggedUser.id;
   const isBlocked = blocked.includes(username);
-  const isFollowing = profile.followers?.some(f => f.username === loggedUser.username);
   const isPrivate = profile.isPrivate;
   const canViewContent = isOwnProfile || isFollowing || !isPrivate;
 
