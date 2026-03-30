@@ -40,3 +40,9 @@ build/
 
 ### Environment ###
 .env
+
+### Coverage ###
+coverage/
+**/coverage/
+*.lcov
+.nyc_output/
