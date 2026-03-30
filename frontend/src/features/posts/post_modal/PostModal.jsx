@@ -3,7 +3,7 @@ import "./postmodal.css";
 import { FiHeart, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import LikedByModal from "../likedby_modal/LikeByModal";
 import { Link } from "react-router-dom";
-import { likePost, unlikePost, checkLike } from "../../../api/likeApi";
+import { likePost, unlikePost, checkLike, getPostLikesWithUsers } from "../../../api/likeApi";
 import { addComment, checkComment, getPostComments } from "../../../api/commentApi";
 
 export default function PostModal({ post, onClose, isOwner, onDeletePost, onDeleteImage }) {
@@ -47,6 +47,20 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
       }
     };
     loadComments();
+  }, [post.id]);
+
+  
+  useEffect(() => {
+    const loadLikedBy = async () => {
+      try {
+        const likes = await getPostLikesWithUsers(post.id);
+        setLikedBy(likes);
+        console.log("Loaded likedBy data:", likes);
+      } catch (err) {
+        console.error("Failed to fetch likes with users:", err);
+      }
+    };
+    loadLikedBy();
   }, [post.id]);
 
   function nextImage() {
@@ -174,7 +188,7 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
             {/* caption */}
             {post.content && (
               <div className="ig-comment">
-                <img src={post.avatar} alt={post.username} className="ig-comment-avatar" />
+                <img src={post.profilePictureUrl || post.avatar || "/default-avatar.svg"} alt={post.username} className="ig-comment-avatar" />
                 <div className="ig-comment-body">
                   <strong>
                     <Link
@@ -193,7 +207,7 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
             {comments.map((c) => (
               <div key={c.id} className="ig-comment">
                 <Link to={`/profile/${c.username}`} onClick={(e) => e.stopPropagation()}>
-                  <img src={c.avatar} alt={c.username} className="ig-comment-avatar" />
+                  <img src={c.profilePictureUrl || c.avatar || "/default-avatar.svg"} alt={c.username} className="ig-comment-avatar" />
                 </Link>
                 <div className="ig-comment-body">
                   <strong>
@@ -228,7 +242,7 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
             <div className="ig-modal-liked-by">
               <div className="ig-modal-liked-avatars">
                 {likedBy.slice(0, 3).map((u) => (
-                  <img key={u.id} src={u.avatar} alt={u.username} title={u.username} />
+                  <img key={u.id} src={u.profilePictureUrl || u.avatar || "/default-avatar.svg"} alt={u.username} title={u.username} />
                 ))}
               </div>
               <span className="ig-modal-liked-text">

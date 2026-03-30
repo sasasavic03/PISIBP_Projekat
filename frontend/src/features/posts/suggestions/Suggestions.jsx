@@ -38,7 +38,7 @@ export default function Suggestions() {
             <li key={user.id} className="ig-suggestions_item">
               <Link to={`/profile/${user.username}`} className="ig-suggestions_link">
                 <img
-                  src={user.avatar}
+                  src={user.profilePictureUrl || "/default-avatar.svg"}
                   alt={user.username}
                   className="ig-suggestions_avatar"
                 />

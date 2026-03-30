@@ -14,7 +14,7 @@ export default function LikedByModal({ likedBy, onClose }) {
         <div className="ig-likedby-list">
           {likedBy.map((user) => (
             <div key={user.id} className="ig-likedby-item">
-              <img src={user.avatar} alt={user.username} />
+              <img src={user.profilePictureUrl || user.avatar || "/default-avatar.svg"} alt={user.username} />
               <span className="ig-likedby-username">{user.username}</span>
               <button className="ig-likedby-follow-btn">Follow</button>
             </div>

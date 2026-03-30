@@ -74,3 +74,13 @@ export async function checkComment(postId) {
   if (!response.ok) throw new Error("Failed to check comment status");
   return response.json();
 }
+
+export async function cancelFollowRequest(recipientId) {
+  const senderId = localStorage.getItem("userId");
+  const response = await fetch(
+      `http://localhost:8080/api/notification/follow-request/cancel?senderId=${senderId}&recipientId=${recipientId}`,
+      { method: "DELETE", headers: authHeaders() }
+  );
+  if (!response.ok) throw new Error("Failed to cancel follow request");
+  return response.json();
+}

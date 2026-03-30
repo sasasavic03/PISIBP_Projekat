@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./post_list.css";
 import PostCard from "../post_card/PostCard";
 import { getUserFeed } from "../../../api/feedApi";
-import { checkLike } from "../../../api/likeApi";
+import { checkLike, getPostLikesWithUsers } from "../../../api/likeApi";
 
 export default function PostList() {
 
@@ -76,6 +76,14 @@ export default function PostList() {
                     console.warn("Failed to check like status for post " + post.id, err);
                   }
         
+                  let likedByData = [];
+                  try {
+                    likedByData = await getPostLikesWithUsers(post.id);
+                    console.log("Fetched likedBy data for post", post.id, ":", likedByData);
+                  } catch (err) {
+                    console.warn("Failed to fetch likes with users for post " + post.id, err);
+                  }
+
                   return {
                     id: post.id,
                     author: author,
@@ -85,7 +93,7 @@ export default function PostList() {
                     mediaList: mediaList,
                     likes: post.likes_count || 0,
                     liked: isLiked,
-                    likedBy: [],
+                    likedBy: likedByData,
                     comments: [],
                   };
                 

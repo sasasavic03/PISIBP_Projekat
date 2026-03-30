@@ -33,7 +33,7 @@ export default function Settings() {
         setBlocked(blockedData);
         setIsPrivate(profileData.isPrivate ?? false);
 
-        setPreview(profileData.avatar || "");
+        setPreview(profileData.profilePictureUrl || "");
         
         setForm(prev => ({
           ...prev,
@@ -78,7 +78,7 @@ export default function Settings() {
       
       if (avatarFile) {
         const avatarData = await updateAvatar(loggedUserId, avatarFile);
-        localStorage.setItem("avatar", avatarData.avatarUrl);
+        localStorage.setItem("avatar", avatarData.profilePictureUrl);
       }
 
       

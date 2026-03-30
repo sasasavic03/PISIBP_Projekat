@@ -39,3 +39,12 @@ export async function checkLike(postId) {
   if (!response.ok) throw new Error("Failed to check like status");
   return response.json();
 }
+
+export async function getPostLikesWithUsers(postId) {
+  const response = await fetch(`${BASE_URL}/post/${postId}/with-users`, {
+    method: "GET",
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to fetch post likes");
+  return response.json();
+}

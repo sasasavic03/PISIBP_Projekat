@@ -41,7 +41,7 @@ export async function updateAvatar(userId, file) {
   const formData = new FormData();
   formData.append("file", file);
   const response = await fetch(`${BASE_URL}/${userId}/avatar`, {
-    method: "PUT",
+    method: "POST",
     headers: { "Authorization": `Bearer ${getToken()}` },
     body: formData
   });

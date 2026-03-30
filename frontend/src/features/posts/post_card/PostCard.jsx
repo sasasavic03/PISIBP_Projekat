@@ -81,7 +81,7 @@ export default function PostCard({
 
       <header className="ig-post_header">
         <Link to={`/profile/${author}`} className="ig-post_user">
-          <img src={avatar} alt={`${author} avatar`} className="ig-post_avatar" />
+          <img src={avatar || "/default-avatar.svg"} alt={`${author} avatar`} className="ig-post_avatar" />
           <span className="ig-post_username">{author}</span>
         </Link>
       </header>

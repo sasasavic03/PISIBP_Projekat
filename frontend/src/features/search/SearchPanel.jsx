@@ -70,7 +70,7 @@ export default function SearchPanel({ onClose }) {
               className="ig-searchpanel-item"
               onClick={onClose}
             >
-              <img src={user.avatar} alt={user.username} />
+              <img src={user.profilePictureUrl || "/default-avatar.svg"} alt={user.username} />
               <div className="ig-searchpanel-item-info">
                 <span className="ig-searchpanel-username">{user.username}</span>
                 <span className="ig-searchpanel-fullname">{user.fullName}</span>

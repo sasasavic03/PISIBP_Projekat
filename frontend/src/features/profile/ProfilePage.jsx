@@ -72,7 +72,7 @@ export default function ProfilePage(){
     return (
       <div className="profile">
         <div className="ig-blocked-view">
-          <img src={profile.avatar} alt={profile.username} className="ig-blocked-avatar" />
+        <img src={profile?.profilePictureUrl || "/default-avatar.svg"} alt={profile.username} className="ig-blocked-avatar" />
           <h2 className="ig-blocked-username">{profile.username}</h2>
           <p className="ig-blocked-text">You have blocked this account.</p>
           <button className="ig-blocked-unblock-btn" onClick={handleUnblock}>

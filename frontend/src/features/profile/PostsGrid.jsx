@@ -5,6 +5,7 @@ import { FiHeart, FiMessageSquare } from "react-icons/fi";
 import { getUserPosts } from "../../api/postApi";
 import { getUserProfile } from "../../api/userApi";
 import { deletePost, deletePostMedia } from "../../api/postApi";
+import { getPostComments } from "../../api/commentApi";
 
 export default function PostsGrid({ username, isOwnProfile }) {
 

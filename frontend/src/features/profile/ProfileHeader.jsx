@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./profileheader.css";
 import FollowersModal from "./followersmodal/FollowersModal";
 import ProfileOptionsModal from "./profile_options_modal/ProfileOptionsModal";
-import { followUser, unfollowUser, checkFollow } from "../../api/followApi";
+import { followUser, unfollowUser, checkFollow, cancelFollowRequest } from "../../api/followApi";
 
 export default function ProfileHeader({ user, stats, isOwnProfile }) {
 
@@ -46,6 +46,7 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
         }
       } else if (requested) {
         await unfollowUser(user.id);
+        await cancelFollowRequest(user.id);
         setRequested(false);
       } else {
         await followUser(user.id);
@@ -60,7 +61,7 @@ export default function ProfileHeader({ user, stats, isOwnProfile }) {
     <div className="ig-profile-header">
 
       <div className="ig-profile-avatar">
-        <img src={user?.avatar} alt="profile" />
+        <img src={user?.profilePictureUrl || "/default-avatar.svg"} alt="profile" />
       </div>
 
       <div className="ig-profile-info">
