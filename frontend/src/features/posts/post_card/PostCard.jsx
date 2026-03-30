@@ -149,6 +149,9 @@ export default function PostCard({
 
       <div className="ig-post_content">
         <p className="ig-post_likes">{likes} likes</p>
+        {comments.length > 0 && (
+          <p className="ig-post_comments">{comments.length} comment{comments.length !== 1 ? 's' : ''}</p>
+        )}
         <p>
           <span className="ig-post_username">
             <Link to={`/profile/${author}`} className="ig-comment_user">{author}</Link>

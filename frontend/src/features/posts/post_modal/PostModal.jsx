@@ -4,7 +4,7 @@ import { FiHeart, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import LikedByModal from "../likedby_modal/LikeByModal";
 import { Link } from "react-router-dom";
 import { likePost, unlikePost, checkLike } from "../../../api/likeApi";
-import { addComment, checkComment  } from "../../../api/commentApi";
+import { addComment, checkComment, getPostComments } from "../../../api/commentApi";
 
 export default function PostModal({ post, onClose, isOwner, onDeletePost, onDeleteImage }) {
 
@@ -33,6 +33,20 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
       }
     };
     checkLikeStatus();
+  }, [post.id]);
+
+  useEffect(() => {
+    const loadComments = async () => {
+      try {
+        const data = await getPostComments(post.id);
+        if(data && data.comment){
+          setComments(data.comments);
+        }
+      } catch (err) {
+        console.error("Failed to fetch comment:", err);
+      }
+    };
+    loadComments();
   }, [post.id]);
 
   function nextImage() {
@@ -88,7 +102,9 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
     if (!newComment.trim()) return;
     try {
       const data = await addComment(post.id, newComment);
-      setComments([...comments, data.comment]);
+      if(data.comment){
+        setComments([...comments, data.comment]);
+      }
       setNewComment("");
     } catch (err) {
       console.error("Failed to add comment:", err);
@@ -189,7 +205,7 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
                       {c.username}
                     </Link>
                   </strong>{" "}
-                  {c.text}
+                  {c.content}
                 </div>
               </div>
             ))}
@@ -203,6 +219,9 @@ export default function PostModal({ post, onClose, isOwner, onDeletePost, onDele
                 : <FiHeart stroke="black" />
               } {likes}
             </button>
+            <span style={{ marginLeft: "15px" }}>
+              💬 {comments.length} {comments.length !== 1 ? 'comments' : 'comment'}
+            </span>
           </div>
 
           {likedBy.length > 0 && (

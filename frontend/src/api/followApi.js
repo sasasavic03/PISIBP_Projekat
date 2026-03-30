@@ -48,9 +48,17 @@ export async function getFollowing(userId) {
   return response.json();
 }
 
-export async function checkFollow(followingId) {
+/* export async function checkFollow(followingId) {
   const response = await fetch(`${BASE_URL}/check?followingId=${followingId}`, {
     method: "GET",
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to check follow status");
+  return response.json();
+} */
+
+export async function checkFollow(targetUserId) {
+  const response = await fetch(`${BASE_URL}/${targetUserId}/status`, {
     headers: authHeaders()
   });
   if (!response.ok) throw new Error("Failed to check follow status");

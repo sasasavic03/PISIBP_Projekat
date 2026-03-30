@@ -29,3 +29,31 @@ export async function checkComment(postId) {
   if (!response.ok) throw new Error("Failed to check comment status");
   return response.json();
 }
+
+export async function getPostComments(postId) {
+  const response = await fetch(`${BASE_URL}/post/${postId}`, {
+    method: "GET",
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to fetch comments");
+  return response.json();
+}
+
+export async function deleteComment(commentId) {
+  const response = await fetch(`${BASE_URL}/${commentId}`, {
+    method: "DELETE",
+    headers: authHeaders()
+  });
+  if (!response.ok) throw new Error("Failed to delete comment");
+  return response.json();
+}
+
+export async function updateComment(commentId, content) {
+  const response = await fetch(`${BASE_URL}/${commentId}`, {
+    method: "PATCH",
+    headers: authHeaders(),
+    body: JSON.stringify({ content })
+  });
+  if (!response.ok) throw new Error("Failed to update comment");
+  return response.json();
+}

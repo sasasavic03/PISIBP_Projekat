@@ -24,25 +24,54 @@ export default function PostsGrid({ username, isOwnProfile }) {
       try {
         const userProfile = await getUserProfile(username);
         const userId = userProfile.id;
-        
+
 
         const data = await getUserPosts(userId);
-        
-        const mapped = data.map(post => ({
-          id: post.id,
-          image: `http://localhost:8080/api/posts/media/${post.media_list?.[0]?.media_url}`,
-          images: post.media_list.map(m => `http://localhost:8080/api/posts/media/${m.media_url}`),
-          mediaList: post.media_list.map(m => ({
-            mediaUrl: `http://localhost:8080/api/posts/media/${m.media_url}`,
-            mediaType: m.media_type,
-            orderIndex: m.order_index,
-          })),
-          likes: post.likes_count,
-          likedBy: post.likedBy ?? [],
-          comments: post.comments ?? [],
-          content: post.description,
-          username: post.user?.username,
-          avatar: post.user?.profilePictureUrl,
+
+        const mapped = await Promise.all(data.map(async (post) => {
+              try {
+                  
+                  const commentsData = await getPostComments(post.id);
+                  const commentCount = commentsData?.count || 0;
+
+                  return {
+                      id: post.id,
+                      image: `http://localhost:8080/api/posts/media/${post.media_list?.[0]?.media_url}`,
+                      images: post.media_list.map(m => `http://localhost:8080/api/posts/media/${m.media_url}`),
+                      mediaList: post.media_list.map(m => ({
+                          mediaUrl: `http://localhost:8080/api/posts/media/${m.media_url}`,
+                          mediaType: m.media_type,
+                          orderIndex: m.order_index,
+                      })),
+                      likes: post.likes_count,
+                      likedBy: post.likedBy ?? [],
+                      comments: commentsData?.comments ?? [],
+                      commentCount: commentCount,
+                      content: post.description,
+                      username: post.user?.username,
+                      avatar: post.user?.profilePictureUrl,
+                  };
+              } catch (err) {
+                  console.error(`Failed to fetch comments for post ${post.id}:`, err);
+
+                  return {
+                      id: post.id,
+                      image: `http://localhost:8080/api/posts/media/${post.media_list?.[0]?.media_url}`,
+                      images: post.media_list.map(m => `http://localhost:8080/api/posts/media/${m.media_url}`),
+                      mediaList: post.media_list.map(m => ({
+                          mediaUrl: `http://localhost:8080/api/posts/media/${m.media_url}`,
+                          mediaType: m.media_type,
+                          orderIndex: m.order_index,
+                      })),
+                      likes: post.likes_count,
+                      likedBy: post.likedBy ?? [],
+                      comments: [],
+                      commentCount: 0,
+                      content: post.description,
+                      username: post.user?.username,
+                      avatar: post.user?.profilePictureUrl,
+                  };
+              }
         }));
         setPosts(mapped);
       } catch (err) {
