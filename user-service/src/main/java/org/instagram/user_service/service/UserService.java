@@ -103,16 +103,27 @@ public class UserService {
         // Filter out blocked users if userId is provided
         if (userId != null) {
             List<Long> blockedUserIds = getBlockedAndBlockingUserIds(userId);
+            int sizeBefore = dtoList.size();
             dtoList = dtoList.stream()
-                    .filter(user -> !blockedUserIds.contains(user.getId()))
+                    .filter(user -> !user.getId().equals(userId)) // Exclude current user
+                    .filter(user -> !blockedUserIds.contains(user.getId())) // Exclude blocked/blocking users
                     .toList();
+            int sizeAfter = dtoList.size();
+            int filtered = sizeBefore - sizeAfter;
+
+            // Create a new Page object with filtered content
+            return new org.springframework.data.domain.PageImpl<>(
+                    dtoList,
+                    pageable,
+                    Math.max(0, results.getTotalElements() - filtered)
+            );
         }
-        
-        // Create a new Page object with filtered content
+
+        // If no userId, return all results as is
         return new org.springframework.data.domain.PageImpl<>(
                 dtoList,
                 pageable,
-                results.getTotalElements() - (results.getContent().size() - dtoList.size())
+                results.getTotalElements()
         );
     }
 

@@ -21,7 +21,7 @@ spring:
             - id: block-service-users
               uri: http://block-service:8080
               predicates:
-                - Path=/api/users/{userId}/block,/api/users/{userId}/blocked
+                - Path=/api/users/{userId}/block,/api/users/{userId}/blocked,/api/users/{userId}/blocked-ids,/api/users/check
               filters:
                 - RewritePath=/api/users(?<segment>/?.*), /api/users${segment}
 

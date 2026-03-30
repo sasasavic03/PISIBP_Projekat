@@ -3,6 +3,7 @@ package org.instagram.follow.controller;
 
 import org.instagram.follow.dto.FollowRequestDto;
 import org.instagram.follow.dto.FollowResponseDto;
+import org.instagram.follow.dto.FollowUserDto;
 import org.instagram.follow.service.FollowService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -120,5 +121,15 @@ public class FollowController {
         } catch (Exception e) {
             return ResponseEntity.ok(Map.of("status", "not_found"));
         }
+    }
+
+    @GetMapping("/{userId}/followers-details")
+    public ResponseEntity<List<FollowUserDto>> getFollowersWithDetails(@PathVariable Long userId){
+        return ResponseEntity.ok(service.getFollowersWithDetails(userId));
+    }
+
+    @GetMapping("/{userId}/following-details")
+    public ResponseEntity<List<FollowUserDto>> getFollowingWithDetails(@PathVariable Long userId){
+        return ResponseEntity.ok(service.getFollowingWithDetails(userId));
     }
 }

@@ -3,23 +3,28 @@ package org.instagram.follow.service;
 import jakarta.transaction.Transactional;
 import org.instagram.follow.client.NotificationClient;
 import org.instagram.follow.dto.FollowResponseDto;
+import org.instagram.follow.dto.FollowUserDto;
 import org.instagram.follow.model.Follow;
 import org.instagram.follow.model.FollowStatus;
 import org.instagram.follow.repository.FollowRepository;
 import org.springframework.stereotype.Service;
+import org.instagram.follow.client.UserServiceClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FollowService {
 
     private final FollowRepository repository;
     private final NotificationClient notificationClient;
+    private final UserServiceClient userServiceClient;
 
-    public FollowService(FollowRepository repository, NotificationClient notificationClient) {
+    public FollowService(FollowRepository repository, NotificationClient notificationClient, UserServiceClient userServiceClient) {
         this.repository = repository;
         this.notificationClient = notificationClient;
+        this.userServiceClient = userServiceClient;
     }
 
     @Transactional
@@ -102,5 +107,40 @@ public class FollowService {
                 .map(f->f.getStatus() == FollowStatus.ACCEPTED ? "following" : "requested")
                 .orElse("none");
     }
+
+    public List<FollowUserDto> getFollowersWithDetails(Long userId) {
+        return repository.findByFollowingIdAndStatus(userId, FollowStatus.ACCEPTED)
+                .stream()
+                .map(f -> {
+                    Map<String, Object> userInfo = userServiceClient.getUserInfo(f.getFollowerid());
+                    if (userInfo != null) {
+                        return new FollowUserDto(
+                                f.getFollowerid(),
+                                (String) userInfo.get("username"),
+                                (String) userInfo.get("profilePictureUrl")
+                        );
+                    }
+                    return new FollowUserDto(f.getFollowerid(), "Unknown", null);
+                })
+                .toList();
+    }
+
+    public List<FollowUserDto> getFollowingWithDetails(Long userId) {
+        return repository.findByFollowerIdAndStatus(userId, FollowStatus.ACCEPTED)
+                .stream()
+                .map(f -> {
+                    Map<String, Object> userInfo = userServiceClient.getUserInfo(f.getFollowingId());
+                    if (userInfo != null) {
+                        return new FollowUserDto(
+                                f.getFollowingId(),
+                                (String) userInfo.get("username"),
+                                (String) userInfo.get("profilePictureUrl")
+                        );
+                    }
+                    return new FollowUserDto(f.getFollowingId(), "Unknown", null);
+                })
+                .toList();
+    }
+
 }
 
