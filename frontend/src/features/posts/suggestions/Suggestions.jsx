@@ -6,13 +6,12 @@ import { getSuggestions } from "../../../api/userApi";
 export default function Suggestions() {
 
   const [users, setUsers] = useState([]);
-  const [followed, setFollowed] = useState({});
 
   useEffect(() => {
     async function fetchSuggestions() {
       try {
         const data = await getSuggestions();
-        setUsers(data);
+        setUsers(data.slice(0, 6));
       } catch (err) {
         console.error("Failed to fetch suggestions:", err);
       }
@@ -20,17 +19,12 @@ export default function Suggestions() {
     fetchSuggestions();
   }, []);
 
-  function handleFollow(userId) {
-    setFollowed(prev => ({ ...prev, [userId]: !prev[userId] }));
-    
-  }
-
   return (
     <aside className="ig-suggestions">
       <div className="ig-suggestions_inner">
         <div className="ig-suggestions_header">
           <p>Suggestions for you</p>
-          <button className="ig-suggestions_seeall">See all</button>
+          {/* <button className="ig-suggestions_seeall">See all</button> */}
         </div>
 
         <ol className="ig-suggestions_list">
@@ -44,18 +38,11 @@ export default function Suggestions() {
                 />
                 <div className="ig-suggestions_text">
                   <span className="ig-suggestions_username">{user.username}</span>
-                  <span className="ig-suggestions_followed">
+                  {/* <span className="ig-suggestions_followed">
                     Followed by {user.followedBy}
-                  </span>
+                  </span> */}
                 </div>
               </Link>
-
-              <button
-                className="ig-suggestions_follow"
-                onClick={() => handleFollow(user.id)}
-              >
-                {followed[user.id] ? "Following" : "Follow"}
-              </button>
             </li>
           ))}
         </ol>

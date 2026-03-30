@@ -1,7 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import "./sidebar.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation,useNavigate} from "react-router-dom";
 import {
   FiHome,
   FiSearch,
@@ -16,14 +15,14 @@ import {
 const navItems = [
   { key: "home",          label: "Home",          icon: <FiHome />,       href: "/feed" },
   { key: "search",        label: "Search",        icon: <FiSearch /> },
-  { key: "explore",       label: "Explore",       icon: <FiCompass />,    href: "/explore" },
-  { key: "messages",      label: "Messages",      icon: <FiSend />,       href: "/messages" },
+  { key: "explore",       label: "Explore",       icon: <FiCompass />,   /*  href: "/explore" */ },
+  { key: "messages",      label: "Messages",      icon: <FiSend />,       /* href: "/messages" */ },
   { key: "notifications", label: "Notifications", icon: <FiHeart /> },
   { key: "create",        label: "Create",        icon: <FiPlusSquare /> },
   { key: "profile",       label: "Profile",       icon: <FiUser /> },
 ];
 
-export default function Sidebar({ activeKey = "home", onNavigate, showSearch, onSearchOpen, onSearchClose, onCreateOpen, showNotifications, onNotificationsOpen, onNotificationsClose, unreadCount }) {
+export default function Sidebar({ onNavigate, showSearch, onSearchOpen, onSearchClose, onCreateOpen, showNotifications, onNotificationsOpen, onNotificationsClose, unreadCount }) {
 
   const navigate = useNavigate();
 
@@ -36,6 +35,21 @@ export default function Sidebar({ activeKey = "home", onNavigate, showSearch, on
     localStorage.removeItem("avatar");
     navigate("/login");
   }
+
+  const location = useLocation();
+
+function getActiveKey() {
+  const path = location.pathname;
+  console.log("current path:", path);
+  if (path.startsWith("/feed")) return "home";
+  if (path.startsWith("/profile")) return "profile";
+  if (path.startsWith("/explore")) return "explore";
+  if (path.startsWith("/messages")) return "messages";
+  if (path.startsWith("/settings")) return "settings";
+  return "home";
+}
+
+  const activeKey = getActiveKey();
 
   const handleClick = (e, item) => {
     if (onNavigate) {
